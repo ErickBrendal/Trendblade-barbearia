@@ -118,12 +118,12 @@ export default function App() {
   const scrollTo = (id) => { setMobileOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
 
   const services = [
-    { num: '01', name: 'Corte / Jeferson', desc: 'Corte com tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
-    { num: '02', name: 'Barba / Jeferson', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
-    { num: '03', name: 'Corte + Barba / Jeferson', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
-    { num: '04', name: 'Corte + Sobrancelha / Jeferson', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
-    { num: '05', name: 'Corte + Hidratação / Jeferson', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '30min', icon: '✨' },
-    { num: '06', name: 'Corte + Barba + Sobrancelha / Jeferson', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h', icon: '👑' },
+    { num: '01', name: 'Corte', desc: 'Corte com tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
+    { num: '02', name: 'Barba', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
+    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
+    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
+    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '30min', icon: '✨' },
+    { num: '06', name: 'Corte + Barba + Sobrancelha', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h', icon: '👑' },
   ]
 
   const schedule = [
