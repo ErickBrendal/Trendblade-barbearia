@@ -1,803 +1,528 @@
-import React, { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button.jsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { Badge } from '@/components/ui/badge.jsx'
-import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors } from 'lucide-react'
+```jsx
+import React, { useState, useEffect, useRef } from 'react'
+import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors, ChevronDown, Menu, X, Award, Users, Heart } from 'lucide-react'
 import logoImage from './assets/IMG_7057.jpg'
 import jeffersonImage from './assets/jefferson.jpg'
 import './App.css'
 
-function App() {
-  const [activeSection, setActiveSection] = useState('home')
-  const [scrolled, setScrolled] = useState(false)
-  const [jeffVisible, setJeffVisible] = useState(false)
-
+function useInView(threshold = 0.12) {
+  const ref = useRef(null)
+  const [inView, setInView] = useState(false)
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true) }, { threshold })
+    if (ref.current) obs.observe(ref.current)
+    return () => obs.disconnect()
+  }, [threshold])
+  return [ref, inView]
+}
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setJeffVisible(true) },
-      { threshold: 0.3 }
-    )
-    const el = document.getElementById('jefferson-section')
-    if (el) observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  const services = [
-    { name: 'Corte', price: 'R$ 45', duration: '30min', num: '01' },
-    { name: 'Barba', price: 'R$ 40', duration: '30min', num: '02' },
-    { name: 'Corte + Barba', price: 'R$ 75', duration: '1h', num: '03' },
-    { name: 'Corte + Sobrancelha', price: 'R$ 55', duration: '30min', num: '04' },
-    { name: 'Corte + Hidratação', price: 'R$ 60', duration: '30min', num: '05' },
-    { name: 'Pacote Completo', price: 'R$ 80', duration: '1h', description: 'Cabelo + Barba + Sobrancelha', num: '06' }
-  ]
-
-  const testimonials = [
-    { name: 'Carlos Silva', rating: 5, text: 'Atendimento impecável! O melhor corte que já fiz em Guarulhos.' },
-    { name: 'Roberto Santos', rating: 5, text: 'Ambiente aconchegante e profissional muito dedicado. Recomendo!' },
-    { name: 'André Costa', rating: 5, text: 'Profissional caprichoso e atencioso. Sempre saio satisfeito!' }
-  ]
-
-  // Agenda corrigida: Domingo e Segunda FECHADOS
-  const schedule = [
-    { day: 'Dom', hours: null, closed: true },
-    { day: 'Seg', hours: null, closed: true },
-    { day: 'Ter', hours: '09h–19h', closed: false },
-    { day: 'Qua', hours: '09h–19h', closed: false },
-    { day: 'Qui', hours: '09h–19h', closed: false },
-    { day: 'Sex', hours: '09h–19h', closed: false },
-    { day: 'Sáb', hours: '08h–17h', closed: false },
-  ]
-
-  const scrollToSection = (sectionId) => {
-    setActiveSection(sectionId)
-    const element = document.getElementById(sectionId)
-    if (element) element.scrollIntoView({ behavior: 'smooth' })
-  }
-
+function Reveal({ children, delay = 0, dir = 'up', className = '', style = {} }) {
+  const [ref, inView] = useInView()
+  const transforms = { up: 'translateY(40px)', left: 'translateX(-40px)', right: 'translateX(40px)', scale: 'scale(0.92)' }
   return (
-    <div className="min-h-screen bg-black text-white" style={{ fontFamily: "'Barlow', sans-serif" }}>
-
-      {/* GOOGLE FONTS */}
-      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@400;600&display=swap" rel="stylesheet" />
-
-      <style>{`
-        :root {
-          --gold: #C9A84C;
-          --gold-light: #E8C96A;
-          --charcoal: #1A1A1A;
-          --dark: #0D0D0D;
-          --mid: #2A2A2A;
-          --muted: #9A9080;
-        }
-        .oswald { font-family: 'Oswald', sans-serif; }
-        .barlow-c { font-family: 'Barlow Condensed', sans-serif; }
-
-        /* NAV */
-        .nav-scrolled { background: rgba(13,13,13,0.98) !important; box-shadow: 0 1px 0 rgba(201,168,76,0.2); }
-        .nav-link { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: #9A9080; transition: color 0.2s; text-decoration: none; background: none; border: none; cursor: pointer; }
-        .nav-link:hover, .nav-link.active { color: #C9A84C; }
-        .nav-cta { background: #C9A84C !important; color: #0D0D0D !important; padding: 0.5rem 1.2rem; font-weight: 600; letter-spacing: 0.1em; border-radius: 2px; }
-
-        /* HERO */
-        .hero-badge { display: inline-block; font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: #C9A84C; border: 1px solid rgba(201,168,76,0.35); padding: 0.4rem 1rem; margin-bottom: 1.5rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
-        .hero-h1 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: clamp(3rem,6vw,5.5rem); line-height: 0.95; text-transform: uppercase; letter-spacing: 0.02em; }
-        .hero-h1 .accent { color: #C9A84C; display: block; }
-
-        /* FOTO DO JEFFERSON — efeito cinematográfico */
-        .jefferson-photo-wrap {
-          position: relative;
-          overflow: hidden;
-          border-radius: 4px;
-        }
-        .jefferson-photo-wrap img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center top;
-          filter: grayscale(10%) contrast(1.12) brightness(0.82) sepia(12%);
-          display: block;
-          transition: transform 0.8s ease, filter 0.8s ease;
-        }
-        .jefferson-photo-wrap:hover img {
-          transform: scale(1.03);
-          filter: grayscale(0%) contrast(1.08) brightness(0.88) sepia(8%);
-        }
-        /* Vignette */
-        .jefferson-photo-wrap::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.65) 100%);
-          z-index: 2;
-          pointer-events: none;
-        }
-        /* Gradiente lateral */
-        .jefferson-photo-wrap::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to right, transparent 55%, rgba(13,13,13,0.95) 100%),
-                      linear-gradient(to bottom, rgba(13,13,13,0.5) 0%, transparent 20%, transparent 75%, rgba(13,13,13,0.8) 100%);
-          z-index: 3;
-          pointer-events: none;
-        }
-        /* Barras de cinema */
-        .cinema-bar {
-          position: absolute;
-          left: 0; right: 0;
-          height: 52px;
-          background: #0D0D0D;
-          z-index: 5;
-          pointer-events: none;
-        }
-        .cinema-bar-top { top: 0; }
-        .cinema-bar-bottom { bottom: 0; }
-        /* Linha dourada vertical decorativa */
-        .jeff-geo-line {
-          position: absolute;
-          top: 50%; left: 2.5rem;
-          transform: translateY(-50%);
-          width: 2px;
-          height: 100px;
-          background: linear-gradient(to bottom, transparent, #C9A84C, transparent);
-          z-index: 6;
-        }
-        /* Tag do barbeiro */
-        .jeff-name-tag {
-          position: absolute;
-          bottom: 80px; right: 1.5rem;
-          z-index: 10;
-          text-align: right;
-        }
-        .jeff-name-tag-name {
-          font-family: 'Oswald', sans-serif;
-          font-weight: 300;
-          font-size: 1rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: #C9A84C;
-        }
-        .jeff-name-tag-role {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 0.7rem;
-          letter-spacing: 0.25em;
-          text-transform: uppercase;
-          color: #9A9080;
-          margin-top: 0.2rem;
-        }
-        .jeff-name-tag-line {
-          width: 36px;
-          height: 1px;
-          background: #C9A84C;
-          margin-left: auto;
-          margin-top: 0.5rem;
-        }
-
-        /* AGENDA */
-        .agenda-day {
-          background: #1A1A1A;
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 4px;
-          padding: 1.2rem 0.6rem;
-          text-align: center;
-          transition: border-color 0.2s, transform 0.15s;
-          position: relative;
-        }
-        .agenda-day:hover:not(.closed) {
-          border-color: rgba(201,168,76,0.4);
-          transform: translateY(-3px);
-        }
-        .agenda-day.closed { opacity: 0.4; }
-        .agenda-day.closed::after {
-          content: 'FECHADO';
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%) rotate(-12deg);
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 0.58rem;
-          font-weight: 700;
-          letter-spacing: 0.15em;
-          color: #8B1A1A;
-          border: 1px solid #8B1A1A;
-          padding: 0.15rem 0.4rem;
-        }
-        .agenda-day-name {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 0.65rem;
-          font-weight: 600;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: #9A9080;
-          margin-bottom: 0.7rem;
-        }
-        .agenda-day-hours {
-          font-family: 'Oswald', sans-serif;
-          font-size: 0.85rem;
-          font-weight: 400;
-          color: #F5F0E8;
-          line-height: 1.4;
-        }
-
-        /* SERVICES */
-        .service-card-custom {
-          background: #111;
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 4px;
-          padding: 1.8rem 1.5rem;
-          position: relative;
-          transition: border-color 0.25s;
-          overflow: hidden;
-        }
-        .service-card-custom::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0;
-          width: 3px; height: 0;
-          background: #C9A84C;
-          transition: height 0.3s;
-        }
-        .service-card-custom:hover { border-color: rgba(201,168,76,0.4); }
-        .service-card-custom:hover::before { height: 100%; }
-        .service-num {
-          font-family: 'Oswald', sans-serif;
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: rgba(201,168,76,0.1);
-          line-height: 1;
-          margin-bottom: 0.8rem;
-        }
-
-        /* SECTION TITLES */
-        .section-tag-custom {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 0.7rem;
-          font-weight: 600;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: #C9A84C;
-          margin-bottom: 0.6rem;
-        }
-        .section-title-custom {
-          font-family: 'Oswald', sans-serif;
-          font-weight: 700;
-          font-size: clamp(2rem,4vw,3rem);
-          text-transform: uppercase;
-          line-height: 1;
-          letter-spacing: 0.02em;
-          margin-bottom: 0.8rem;
-        }
-        .section-title-custom span { color: #C9A84C; }
-        .divider-gold { width: 40px; height: 2px; background: #C9A84C; margin-bottom: 2rem; }
-
-        /* JEFF SECTION */
-        .jeff-section-fade {
-          opacity: 0;
-          transform: translateX(-30px);
-          transition: opacity 0.9s ease, transform 0.9s ease;
-        }
-        .jeff-section-fade.visible {
-          opacity: 1;
-          transform: translateX(0);
-        }
-        .jeff-quote {
-          font-family: 'Oswald', sans-serif;
-          font-size: 1.5rem;
-          font-weight: 300;
-          font-style: italic;
-          line-height: 1.5;
-          color: #F5F0E8;
-          position: relative;
-          padding-left: 1.5rem;
-          margin-bottom: 1.5rem;
-        }
-        .jeff-quote::before {
-          content: '"';
-          position: absolute;
-          left: 0; top: -0.5rem;
-          font-size: 3.5rem;
-          color: #C9A84C;
-          line-height: 1;
-          font-family: 'Oswald', sans-serif;
-        }
-
-        /* FOOTER */
-        .footer-custom { background: #0D0D0D; border-top: 1px solid rgba(201,168,76,0.2); }
-        .footer-col-title {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 0.68rem;
-          font-weight: 600;
-          letter-spacing: 0.25em;
-          text-transform: uppercase;
-          color: #C9A84C;
-          margin-bottom: 1rem;
-        }
-
-        /* BTN GOLD */
-        .btn-gold {
-          background: #C9A84C;
-          color: #0D0D0D;
-          font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 600;
-          font-size: 0.9rem;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          padding: 0.85rem 2rem;
-          border-radius: 2px;
-          border: none;
-          cursor: pointer;
-          transition: background 0.2s, transform 0.15s;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          text-decoration: none;
-        }
-        .btn-gold:hover { background: #E8C96A; transform: translateY(-2px); }
-        .btn-outline-gold {
-          border: 1px solid rgba(201,168,76,0.5);
-          color: #C9A84C;
-          font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 600;
-          font-size: 0.9rem;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          padding: 0.85rem 2rem;
-          border-radius: 2px;
-          background: transparent;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          text-decoration: none;
-        }
-        .btn-outline-gold:hover { background: rgba(201,168,76,0.1); }
-      `}</style>
-
-      {/* NAV */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'nav-scrolled' : 'bg-black/80 backdrop-blur-sm'}`}
-           style={{ borderBottom: '1px solid rgba(201,168,76,0.15)' }}>
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <img src={logoImage} alt="Trend Blade Logo" className="h-9 w-auto" />
-            <span className="oswald text-xl font-bold" style={{ color: '#C9A84C', letterSpacing: '0.08em' }}>
-              TREND <span style={{ color: '#fff' }}>BLADE</span>
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-7">
-            {[
-              { id: 'home', label: 'Início' },
-              { id: 'sobre', label: 'Sobre' },
-              { id: 'servicos', label: 'Serviços' },
-              { id: 'agenda', label: 'Agenda' },
-              { id: 'depoimentos', label: 'Avaliações' },
-            ].map(({ id, label }) => (
-              <button key={id} onClick={() => scrollToSection(id)}
-                className={`nav-link barlow-c ${activeSection === id ? 'active' : ''}`}>
-                {label}
-              </button>
-            ))}
-            <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-               target="_blank" rel="noopener noreferrer"
-               className="nav-link nav-cta barlow-c">
-              Agendar
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      {/* HERO */}
-      <section id="home" className="pt-20 min-h-screen flex items-center"
-               style={{ background: 'linear-gradient(135deg, #0D0D0D 0%, #1A1510 50%, #0D0D0D 100%)' }}>
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="hero-badge">Barbearia Premium · Guarulhos, SP</div>
-              <h1 className="hero-h1 mb-6">
-                Estilo &amp;
-                <span className="accent">Precisão</span>
-                Redefinidos
-              </h1>
-              <p className="text-lg mb-8 leading-relaxed" style={{ color: '#9A9080', maxWidth: 400 }}>
-                Mais que um corte — uma experiência premium. Transformamos seu visual com técnica,
-                estilo e o melhor atendimento de Guarulhos.
-              </p>
-              <div className="flex items-center gap-3 mb-8">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" style={{ color: '#C9A84C' }} />
-                ))}
-                <span className="text-sm font-semibold">5.0</span>
-                <span className="text-sm" style={{ color: '#9A9080' }}>(145 avaliações)</span>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                   target="_blank" rel="noopener noreferrer" className="btn-gold">
-                  <Calendar className="h-4 w-4" /> Agendar Agora
-                </a>
-                <button onClick={() => scrollToSection('contato')} className="btn-outline-gold">
-                  <Phone className="h-4 w-4" /> Contato
-                </button>
-              </div>
-            </div>
-
-            {/* FOTO DO JEFFERSON NO HERO */}
-            <div className="relative" style={{ height: 520 }}>
-              <div className="jefferson-photo-wrap" style={{ height: '100%', borderRadius: 4 }}>
-                <img src={jeffersonImage} alt="Jefferson — Fundador Trend Blade"
-                     onError={(e) => {
-                       e.target.style.display = 'none'
-                       e.target.parentElement.style.background = 'linear-gradient(135deg,#1a1510,#2a2015)'
-                     }} />
-                <div className="cinema-bar cinema-bar-top"></div>
-                <div className="cinema-bar cinema-bar-bottom"></div>
-                <div className="jeff-geo-line"></div>
-                <div className="jeff-name-tag">
-                  <div className="jeff-name-tag-name">Jefferson</div>
-                  <div className="jeff-name-tag-role">Fundador & Master Barber</div>
-                  <div className="jeff-name-tag-line"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SOBRE */}
-      <section id="sobre" className="py-20" style={{ background: '#111' }}>
-        <div className="container mx-auto px-6">
-          <div className="max-w-5xl mx-auto">
-            <div className="section-tag-custom">Nossa história</div>
-            <div className="section-title-custom">Sobre a <span>Trend Blade</span></div>
-            <div className="divider-gold"></div>
-            <p className="text-lg mb-12 leading-relaxed max-w-2xl" style={{ color: '#9A9080' }}>
-              Localizada no coração de Guarulhos, a Trend Blade Barbearia nasceu da paixão por transformar
-              o cuidado masculino em uma experiência única. Combinamos técnicas tradicionais com tendências
-              modernas, criando um ambiente onde estilo, conforto e qualidade se encontram.
-            </p>
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { title: 'Experiência Premium', text: 'Cada cliente recebe atenção personalizada em um ambiente sofisticado e aconchegante.' },
-                { title: 'Técnica Apurada', text: 'Profissionais dedicados e caprichosos, sempre atualizados com as últimas tendências.' },
-                { title: 'Comodidade Total', text: 'Wi-Fi gratuito, cartão de crédito e um ambiente aconchegante para sua conveniência.' }
-              ].map((item, i) => (
-                <div key={i} style={{
-                  background: '#1A1A1A',
-                  border: '1px solid rgba(201,168,76,0.15)',
-                  borderRadius: 4,
-                  padding: '1.8rem 1.5rem',
-                  borderTop: '2px solid #C9A84C'
-                }}>
-                  <div className="oswald text-lg font-semibold mb-3" style={{ color: '#C9A84C', letterSpacing: '0.05em' }}>
-                    {item.title}
-                  </div>
-                  <p style={{ color: '#9A9080', fontSize: '0.9rem', lineHeight: 1.7 }}>{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SERVIÇOS */}
-      <section id="servicos" className="py-20" style={{ background: '#0D0D0D' }}>
-        <div className="container mx-auto px-6">
-          <div className="section-tag-custom">O que oferecemos</div>
-          <div className="section-title-custom">Nossos <span>Serviços</span></div>
-          <div className="divider-gold"></div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl">
-            {services.map((service, index) => (
-              <div key={index} className="service-card-custom">
-                <div className="service-num">{service.num}</div>
-                <div className="oswald text-lg font-semibold mb-1" style={{ letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                  {service.name}
-                </div>
-                {service.description && (
-                  <p style={{ color: '#9A9080', fontSize: '0.8rem', marginBottom: '0.5rem' }}>{service.description}</p>
-                )}
-                <div className="flex items-center gap-2 mb-4" style={{ color: '#9A9080', fontSize: '0.82rem' }}>
-                  <Clock className="h-3 w-3" />{service.duration}
-                </div>
-                <div className="oswald text-2xl font-semibold" style={{ color: '#C9A84C' }}>
-                  {service.price}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-12">
-            <p style={{ color: '#9A9080', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-              Agende seu horário pelo Booksy ou WhatsApp
-            </p>
-            <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-               target="_blank" rel="noopener noreferrer" className="btn-gold">
-              <Calendar className="h-4 w-4" /> Agendar pelo Booksy
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* AGENDA */}
-      <section id="agenda" className="py-20" style={{ background: '#111' }}>
-        <div className="container mx-auto px-6">
-          <div className="section-tag-custom">Funcionamento</div>
-          <div className="section-title-custom">Horários de <span>Atendimento</span></div>
-          <div className="divider-gold"></div>
-          <div className="grid grid-cols-7 gap-3 max-w-3xl">
-            {schedule.map((item, i) => (
-              <div key={i} className={`agenda-day ${item.closed ? 'closed' : ''}`}>
-                <div className="agenda-day-name">{item.day}</div>
-                {!item.closed && (
-                  <div className="agenda-day-hours">{item.hours?.replace('–', '\n').split('\n').map((h, j) => (
-                    <span key={j} style={{ display: 'block' }}>{h}</span>
-                  ))}</div>
-                )}
-                {item.closed && (
-                  <div className="agenda-day-hours" style={{ color: '#9A9080', fontSize: '0.75rem' }}>—</div>
-                )}
-              </div>
-            ))}
-          </div>
-          <p style={{ marginTop: '1.5rem', fontSize: '0.78rem', color: '#9A9080', letterSpacing: '0.05em' }}>
-            * Domingo e Segunda-feira: atendimento fechado. Agendamento via Booksy ou WhatsApp.
-          </p>
-        </div>
-      </section>
-
-      {/* JEFFERSON — SEÇÃO DESTAQUE */}
-      <section id="jefferson-section" style={{ background: '#0D0D0D', padding: 0 }}>
-        <div className="grid md:grid-cols-2" style={{ minHeight: 600 }}>
-          {/* FOTO EFEITO PREMIUM */}
-          <div className="jefferson-photo-wrap" style={{ minHeight: 500, position: 'relative' }}>
-            <img src={jeffersonImage} alt="Jefferson — Master Barber Trend Blade"
-                 style={{ minHeight: 500 }}
-                 onError={(e) => {
-                   e.target.style.display = 'none'
-                   e.target.parentElement.style.background = 'linear-gradient(135deg,#1a1510,#2a2015)'
-                   e.target.parentElement.style.minHeight = '500px'
-                 }} />
-            <div className="cinema-bar cinema-bar-top"></div>
-            <div className="cinema-bar cinema-bar-bottom"></div>
-            <div className="jeff-geo-line"></div>
-            {/* Linha dourada horizontal na base */}
-            <div style={{
-              position: 'absolute', bottom: 52, left: 0, right: 0,
-              height: 2,
-              background: 'linear-gradient(to right, transparent, #C9A84C 30%, transparent)',
-              zIndex: 6
-            }}></div>
-          </div>
-
-          {/* TEXTO */}
-          <div id="jefferson-section-text" className={`jeff-section-fade ${jeffVisible ? 'visible' : ''}`}
-               style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4rem 3.5rem', background: '#1A1A1A' }}>
-            <div className="section-tag-custom">O profissional por trás da arte</div>
-            <div className="jeff-quote">
-              Barbearia não é só corte de cabelo. É o lugar onde o homem cuida de si mesmo, com orgulho.
-            </div>
-            <div className="oswald text-xl font-semibold" style={{ color: '#C9A84C', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              Jefferson
-            </div>
-            <div className="barlow-c text-xs mt-1" style={{ letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9A9080' }}>
-              Fundador & Master Barber — Trend Blade Barbearia
-            </div>
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem',
-              marginTop: '2.5rem', paddingTop: '2rem',
-              borderTop: '1px solid rgba(255,255,255,0.08)'
-            }}>
-              {[
-                { label: 'Especialidade', val: 'Cortes Degradê & Barba' },
-                { label: 'Localização', val: 'Guarulhos, SP' },
-                { label: 'Agendamento', val: 'Booksy & WhatsApp' },
-                { label: 'Atendimento', val: 'Terça → Sábado' },
-              ].map((spec, i) => (
-                <div key={i}>
-                  <div className="barlow-c" style={{ fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9A9080', marginBottom: '0.3rem' }}>
-                    {spec.label}
-                  </div>
-                  <div className="oswald" style={{ fontSize: '0.95rem', color: '#F5F0E8' }}>{spec.val}</div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8 flex gap-3">
-              <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                 target="_blank" rel="noopener noreferrer" className="btn-gold" style={{ fontSize: '0.8rem' }}>
-                <Calendar className="h-4 w-4" /> Agendar
-              </a>
-              <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer"
-                 className="btn-outline-gold" style={{ fontSize: '0.8rem' }}>
-                <Phone className="h-4 w-4" /> WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* COMODIDADES */}
-      <section style={{ padding: '4rem 0', background: '#111', borderTop: '1px solid rgba(201,168,76,0.1)' }}>
-        <div className="container mx-auto px-6 text-center">
-          <div className="section-tag-custom" style={{ textAlign: 'center' }}>Diferenciais</div>
-          <div className="flex flex-wrap justify-center gap-10 mt-6">
-            {[
-              { icon: Wifi, text: 'Wi-Fi Gratuito' },
-              { icon: CreditCard, text: 'Cartão de Crédito' },
-              { icon: Scissors, text: 'Profissionais Especializados' },
-              { icon: Star, text: '5.0 no Google' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3" style={{ color: '#9A9080', fontSize: '0.9rem' }}>
-                <item.icon className="h-5 w-5" style={{ color: '#C9A84C' }} />
-                {item.text}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* DEPOIMENTOS */}
-      <section id="depoimentos" className="py-20" style={{ background: '#0D0D0D' }}>
-        <div className="container mx-auto px-6">
-          <div className="section-tag-custom">Clientes satisfeitos</div>
-          <div className="section-title-custom">O que nossos <span>clientes</span> dizem</div>
-          <div className="divider-gold"></div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
-            {testimonials.map((t, i) => (
-              <div key={i} style={{
-                background: '#1A1A1A',
-                border: '1px solid rgba(201,168,76,0.12)',
-                borderRadius: 4,
-                padding: '1.8rem 1.5rem'
-              }}>
-                <div className="flex gap-1 mb-3">
-                  {[...Array(t.rating)].map((_, j) => (
-                    <Star key={j} className="h-3 w-3 fill-current" style={{ color: '#C9A84C' }} />
-                  ))}
-                </div>
-                <div className="oswald text-base font-semibold mb-2" style={{ letterSpacing: '0.05em' }}>{t.name}</div>
-                <p style={{ color: '#9A9080', fontSize: '0.88rem', lineHeight: 1.7, fontStyle: 'italic' }}>"{t.text}"</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CONTATO */}
-      <section id="contato" className="py-20" style={{ background: '#111' }}>
-        <div className="container mx-auto px-6">
-          <div className="section-tag-custom">Fale conosco</div>
-          <div className="section-title-custom">Entre em <span>Contato</span></div>
-          <div className="divider-gold"></div>
-          <div className="grid md:grid-cols-2 gap-12 max-w-5xl">
-            <div className="space-y-6">
-              {[
-                { icon: MapPin, title: 'Endereço', content: 'Av Papa Pio XII, nº 218\nGuarulhos, São Paulo' },
-                { icon: Phone, title: 'WhatsApp', content: '(11) 95123-1443', href: 'https://wa.me/5511951231443' },
-                { icon: Instagram, title: 'Instagram', content: '@trendbladebarbearia', href: 'https://instagram.com/trendbladebarbearia' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <item.icon className="h-5 w-5 mt-1 flex-shrink-0" style={{ color: '#C9A84C' }} />
-                  <div>
-                    <div className="oswald font-semibold text-sm mb-1" style={{ letterSpacing: '0.08em', textTransform: 'uppercase' }}>{item.title}</div>
-                    {item.href ? (
-                      <a href={item.href} target="_blank" rel="noopener noreferrer"
-                         style={{ color: '#9A9080', fontSize: '0.9rem', textDecoration: 'none', transition: 'color 0.2s' }}
-                         onMouseEnter={e => e.target.style.color = '#C9A84C'}
-                         onMouseLeave={e => e.target.style.color = '#9A9080'}>
-                        {item.content}
-                      </a>
-                    ) : (
-                      <p style={{ color: '#9A9080', fontSize: '0.9rem', whiteSpace: 'pre-line' }}>{item.content}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {/* HORÁRIOS NO CONTATO */}
-              <div className="flex items-start gap-4">
-                <Clock className="h-5 w-5 mt-1 flex-shrink-0" style={{ color: '#C9A84C' }} />
-                <div>
-                  <div className="oswald font-semibold text-sm mb-2" style={{ letterSpacing: '0.08em', textTransform: 'uppercase' }}>Horário de Funcionamento</div>
-                  <div style={{ color: '#9A9080', fontSize: '0.88rem', lineHeight: 2 }}>
-                    <span style={{ color: 'rgba(139,26,26,0.9)' }}>Domingo — Fechado</span><br />
-                    <span style={{ color: 'rgba(139,26,26,0.9)' }}>Segunda — Fechado</span><br />
-                    Terça a Sexta — 09h às 19h<br />
-                    Sábado — 08h às 17h
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="oswald text-xl font-semibold mb-6" style={{ color: '#C9A84C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                Agende seu Horário
-              </div>
-              <div className="flex flex-col gap-3">
-                <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                   target="_blank" rel="noopener noreferrer"
-                   className="btn-gold" style={{ justifyContent: 'center' }}>
-                  <Calendar className="h-4 w-4" /> Agendar pelo Booksy
-                </a>
-                <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer"
-                   className="btn-outline-gold" style={{ justifyContent: 'center' }}>
-                  <Phone className="h-4 w-4" /> WhatsApp
-                </a>
-              </div>
-              <div style={{
-                marginTop: '2rem', padding: '1.5rem',
-                background: '#1A1A1A', borderRadius: 4,
-                border: '1px solid rgba(201,168,76,0.15)'
-              }}>
-                <div className="oswald font-semibold mb-3" style={{ color: '#C9A84C', fontSize: '0.9rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                  Por que escolher a Trend Blade?
-                </div>
-                <ul style={{ color: '#9A9080', fontSize: '0.85rem', lineHeight: 2.2 }}>
-                  {['Profissionais especializados e dedicados', 'Ambiente aconchegante e sofisticado',
-                    'Técnicas modernas e tradicionais', 'Atendimento personalizado',
-                    'Localização privilegiada em Guarulhos'].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <span style={{ color: '#C9A84C', fontSize: '0.7rem' }}>✦</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="footer-custom py-12">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-10 mb-10">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src={logoImage} alt="Trend Blade Logo" className="h-9 w-auto" />
-                <span className="oswald text-xl font-bold" style={{ color: '#C9A84C', letterSpacing: '0.08em' }}>
-                  TREND <span style={{ color: '#fff' }}>BLADE</span>
-                </span>
-              </div>
-              <p style={{ color: '#9A9080', fontSize: '0.85rem', lineHeight: 1.7 }}>
-                Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento diferenciado.
-              </p>
-            </div>
-            <div>
-              <div className="footer-col-title">Contato</div>
-              <div style={{ color: '#9A9080', fontSize: '0.85rem', lineHeight: 2.2 }}>
-                <div>(11) 95123-1443</div>
-                <div>@trendbladebarbearia</div>
-                <div>Av Papa Pio XII, nº 218 · Guarulhos</div>
-              </div>
-            </div>
-            <div>
-              <div className="footer-col-title">Horários</div>
-              <div style={{ color: '#9A9080', fontSize: '0.85rem', lineHeight: 2.2 }}>
-                <span style={{ color: 'rgba(139,26,26,0.8)' }}>Dom & Seg — Fechado</span><br />
-                Ter a Sex — 09h às 19h<br />
-                Sáb — 08h às 17h
-              </div>
-            </div>
-          </div>
-          <div style={{
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            paddingTop: '1.5rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '0.75rem',
-            color: 'rgba(154,144,128,0.5)'
-          }}>
-            <span>© 2025 Trend Blade Barbearia. Estilo e sofisticação em Guarulhos.</span>
-            <span className="barlow-c" style={{
-              fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase',
-              color: 'rgba(201,168,76,0.35)', border: '1px solid rgba(201,168,76,0.15)',
-              padding: '0.25rem 0.7rem'
-            }}>Homologação</span>
-          </div>
-        </div>
-      </footer>
+    <div ref={ref} className={className} style={{
+      ...style,
+      opacity: inView ? 1 : 0,
+      transform: inView ? 'none' : transforms[dir],
+      transition: `opacity 0.8s cubic-bezier(.16,1,.3,1) ${delay}s, transform 0.8s cubic-bezier(.16,1,.3,1) ${delay}s`
+    }}>
+      {children}
     </div>
   )
 }
 
-export default App
+function ParticleField() {
+  const canvasRef = useRef(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    let W = canvas.width = window.innerWidth
+    let H = canvas.height = window.innerHeight
+    const particles = Array.from({ length: 55 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      o: Math.random() * 0.5 + 0.1
+    }))
+    let raf
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H)
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(201,168,76,${p.o})`
+        ctx.fill()
+      })
+      particles.forEach((a, i) => particles.slice(i + 1).forEach(b => {
+        const d = Math.hypot(a.x - b.x, a.y - b.y)
+        if (d < 120) {
+          ctx.beginPath()
+          ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y)
+          ctx.strokeStyle = `rgba(201,168,76,${0.08 * (1 - d / 120)})`
+          ctx.lineWidth = 0.5; ctx.stroke()
+        }
+      }))
+      raf = requestAnimationFrame(draw)
+    }
+    draw()
+    const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight }
+    window.addEventListener('resize', onResize)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize) }
+  }, [])
+  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />
+}
+
+function Counter({ target, suffix = '', duration = 2000 }) {
+  const [count, setCount] = useState(0)
+  const [ref, inView] = useInView(0.5)
+  useEffect(() => {
+    if (!inView) return
+    let start = 0
+    const step = target / (duration / 16)
+    const timer = setInterval(() => {
+      start += step
+      if (start >= target) { setCount(target); clearInterval(timer) }
+      else setCount(Math.floor(start))
+    }, 16)
+    return () => clearInterval(timer)
+  }, [inView, target, duration])
+  return <span ref={ref}>{count}{suffix}</span>
+}
+
+export default function App() {
+  const [scrolled, setScrolled] = useState(false)
+  const [activeSection, setActiveSection] = useState('home')
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [heroReady, setHeroReady] = useState(false)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    setTimeout(() => setHeroReady(true), 200)
+    const onScroll = () => {
+      setScrolled(window.scrollY > 60)
+      const ids = ['home','sobre','servicos','agenda','depoimentos','contato']
+      for (const id of [...ids].reverse()) {
+        const el = document.getElementById(id)
+        if (el && window.scrollY >= el.offsetTop - 130) { setActiveSection(id); break }
+      }
+    }
+    const onMouse = (e) => setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight })
+    window.addEventListener('scroll', onScroll)
+    window.addEventListener('mousemove', onMouse)
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('mousemove', onMouse) }
+  }, [])
+
+  const scrollTo = (id) => { setMobileOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
+
+  const services = [
+    { num: '01', name: 'Corte Clássico', desc: 'Tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
+    { num: '02', name: 'Barba Completa', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
+    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
+    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
+    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '45min', icon: '✨' },
+    { num: '06', name: 'Pacote Completo', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h30', icon: '👑' },
+  ]
+
+  const schedule = [
+    { day: 'Dom', closed: true },
+    { day: 'Seg', closed: true },
+    { day: 'Ter', hours: '09h', end: '19h', closed: false },
+    { day: 'Qua', hours: '09h', end: '19h', closed: false },
+    { day: 'Qui', hours: '09h', end: '19h', closed: false },
+    { day: 'Sex', hours: '09h', end: '19h', closed: false },
+    { day: 'Sáb', hours: '08h', end: '17h', closed: false },
+  ]
+
+  const testimonials = [
+    { name: 'Carlos Silva', rating: 5, text: 'Atendimento impecável! O melhor corte que já fiz em Guarulhos. Me sinto renovado a cada visita.', initial: 'C', time: 'há 2 dias' },
+    { name: 'Roberto Santos', rating: 5, text: 'Ambiente aconchegante, profissional extremamente dedicado. Já indiquei para toda a minha família!', initial: 'R', time: 'há 1 semana' },
+    { name: 'André Costa', rating: 5, text: 'Caprichoso e atencioso em cada detalhe. Sempre saio satisfeito e com o visual perfeito.', initial: 'A', time: 'há 2 semanas' },
+  ]
+
+  const navLinks = [
+    { id: 'home', label: 'Início' }, { id: 'sobre', label: 'Sobre' },
+    { id: 'servicos', label: 'Serviços' }, { id: 'agenda', label: 'Agenda' },
+    { id: 'depoimentos', label: 'Avaliações' }, { id: 'contato', label: 'Contato' },
+  ]
+
+  return (
+    <div style={{ fontFamily:"'Barlow',sans-serif", background:'#0A0A0A', color:'#F5F0E8', overflowX:'hidden' }}>
+      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+      <style>{`
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        :root{--gold:#C9A84C;--gold-l:#E8C96A;--gold-d:#8B6914;--dark:#0A0A0A;--dark2:#0F0F0F;--mid:#181818;--mid2:#202020;--muted:#9A9080;--light:#F5F0E8;--red:#c0392b}
+        .oswald{font-family:'Oswald',sans-serif} .bc{font-family:'Barlow Condensed',sans-serif}
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0A0A0A} ::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
+        .nav{position:fixed;top:0;left:0;right:0;z-index:1000;transition:all 0.4s}
+        .nav.scrolled{background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.12);box-shadow:0 4px 30px rgba(0,0,0,0.4)}
+        .nav-inner{max-width:1280px;margin:0 auto;padding:0 2.5rem;height:72px;display:flex;align-items:center;justify-content:space-between}
+        .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+        .nav-logo img{height:38px;width:auto;transition:transform 0.3s} .nav-logo:hover img{transform:rotate(-5deg) scale(1.05)}
+        .logo-text{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;letter-spacing:0.1em;color:var(--gold)} .logo-text span{color:var(--light)}
+        .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+        .nl{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;transition:color 0.2s;padding:0;position:relative}
+        .nl::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
+        .nl:hover,.nl.active{color:var(--gold)} .nl:hover::after,.nl.active::after{transform:scaleX(1)}
+        .nav-cta{background:var(--gold)!important;color:var(--dark)!important;padding:0.55rem 1.5rem;border-radius:2px;font-weight:700!important;transition:all 0.2s!important}
+        .nav-cta:hover{background:var(--gold-l)!important;transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.3)!important} .nav-cta::after{display:none!important}
+        .hamburger{display:none;background:none;border:1px solid rgba(201,168,76,0.3);border-radius:2px;cursor:pointer;color:var(--light);padding:6px 8px;transition:all 0.2s}
+        .hamburger:hover{border-color:var(--gold);color:var(--gold)}
+        .mmenu{position:fixed;inset:0;background:rgba(10,10,10,0.99);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
+        .mmenu.open{opacity:1;pointer-events:all}
+        .mmenu-link{font-family:'Oswald',sans-serif;font-size:2.5rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--light);background:none;border:none;cursor:pointer;transition:color 0.2s} .mmenu-link:hover{color:var(--gold)}
+        .mmenu-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s} .mmenu-close:hover{color:var(--gold)}
+        .btn-g{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--gold);color:var(--dark);padding:0.95rem 2.2rem;border:none;border-radius:2px;cursor:pointer;text-decoration:none;transition:all 0.25s;position:relative;overflow:hidden}
+        .btn-g::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,0.15) 50%,transparent 60%);transform:translateX(-100%);transition:transform 0.5s}
+        .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.35)} .btn-g:hover::before{transform:translateX(100%)}
+        .btn-o{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:transparent;color:var(--gold);padding:0.95rem 2.2rem;border:1px solid rgba(201,168,76,0.4);border-radius:2px;cursor:pointer;text-decoration:none;transition:all 0.25s}
+        .btn-o:hover{background:rgba(201,168,76,0.08);border-color:var(--gold);transform:translateY(-2px)}
+        .sec{padding:7rem 0} .inner{max-width:1280px;margin:0 auto;padding:0 2.5rem}
+        .stag{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
+        .stag::before{content:'';width:24px;height:1px;background:var(--gold)}
+        .stitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,4vw,3.2rem);text-transform:uppercase;line-height:1;letter-spacing:0.02em;margin-bottom:0.8rem} .stitle span{color:var(--gold)}
+        .sdiv{width:40px;height:2px;background:var(--gold);margin-bottom:2.5rem}
+        .hero{min-height:100vh;display:grid;grid-template-columns:55% 45%;position:relative;overflow:hidden}
+        .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,0.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,168,76,0.03) 0%,transparent 50%);z-index:0}
+        .hero-left{display:flex;flex-direction:column;justify-content:center;padding:9rem 3rem 6rem 6rem;position:relative;z-index:2}
+        .hero-badge{display:inline-flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.25);padding:0.45rem 1.1rem;margin-bottom:2rem;width:fit-content;background:rgba(201,168,76,0.04)}
+        .hero-h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(3.5rem,5.5vw,6.5rem);line-height:0.9;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:1.8rem}
+        .hero-h1 .gold{color:var(--gold);display:block} .hero-h1 .outline{-webkit-text-stroke:1px rgba(255,255,255,0.3);color:transparent;display:block}
+        .hero-sub{font-size:1rem;color:var(--muted);line-height:1.8;max-width:400px;margin-bottom:2rem}
+        .hero-stars{display:flex;align-items:center;gap:0.4rem;margin-bottom:2.5rem;padding:0.8rem 1.2rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:3px;width:fit-content}
+        .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+        .hero-right{position:relative;display:flex;align-items:center;justify-content:center;padding:7rem 3rem 5rem 0;z-index:2}
+        .jeff-portrait-wrap{position:relative;width:340px;max-width:90%;flex-shrink:0}
+        .jeff-portrait-frame{position:relative;border-radius:4px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(201,168,76,0.15)}
+        .jeff-portrait-frame::before{content:'';position:absolute;inset:0;z-index:4;background:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,transparent 30%,transparent 65%,rgba(0,0,0,0.5) 100%);pointer-events:none}
+        .jeff-portrait-img{width:100%;display:block;object-fit:cover;object-position:center top;filter:grayscale(10%) contrast(1.12) brightness(0.82) sepia(8%);transition:transform 0.8s ease,filter 0.5s}
+        .jeff-portrait-wrap:hover .jeff-portrait-img{transform:scale(1.03);filter:grayscale(0%) contrast(1.08) brightness(0.88) sepia(4%)}
+        .jeff-gold-border{position:absolute;top:-8px;left:-8px;right:8px;bottom:8px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;z-index:0;pointer-events:none}
+        .jeff-label{position:absolute;bottom:0;left:0;right:0;z-index:5;padding:1.5rem 1.2rem;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent)}
+        .jeff-label-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.1rem;letter-spacing:0.15em;text-transform:uppercase;color:#fff}
+        .jeff-label-role{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-top:0.2rem}
+        .jeff-deco-line{position:absolute;top:50%;right:-20px;width:1px;height:80px;background:linear-gradient(to bottom,transparent,var(--gold),transparent);transform:translateY(-50%)}
+        .jeff-floating-badge{position:absolute;top:20px;right:-50px;background:var(--gold);color:var(--dark);font-family:'Oswald',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.1em;padding:0.5rem 0.8rem;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 24px rgba(201,168,76,0.4)}
+        .jeff-floating-stars{position:absolute;bottom:80px;right:-60px;background:rgba(10,10,10,0.9);border:1px solid rgba(201,168,76,0.2);padding:0.6rem 0.8rem;display:flex;flex-direction:column;align-items:center;gap:2px}
+        .band{background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-d));padding:1rem 0;overflow:hidden}
+        .band-track{display:flex;animation:marquee 25s linear infinite;white-space:nowrap}
+        @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        .band-item{font-family:'Oswald',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--dark);padding:0 2.5rem;display:inline-flex;align-items:center;gap:0.8rem;flex-shrink:0}
+        .band-dot{width:4px;height:4px;background:var(--dark);border-radius:50%;opacity:0.4}
+        .about-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+        .about-text p{font-size:1rem;color:var(--muted);line-height:1.85;margin-bottom:1.5rem}
+        .about-cards{display:flex;flex-direction:column;gap:1px}
+        .acard{background:var(--mid);border-left:2px solid var(--gold);padding:1.5rem 1.8rem;transition:background 0.2s,transform 0.2s;cursor:default}
+        .acard:hover{background:var(--mid2);transform:translateX(6px)}
+        .acard-icon{width:36px;height:36px;background:rgba(201,168,76,0.1);border-radius:2px;display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem;color:var(--gold)}
+        .acard-title{font-family:'Oswald',sans-serif;font-size:0.95rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--light);margin-bottom:0.4rem}
+        .acard-text{font-size:0.85rem;color:var(--muted);line-height:1.65}
+        .counters{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04);margin-top:2.5rem}
+        .counter-box{background:var(--dark2);padding:1.8rem 1rem;text-align:center}
+        .counter-num{font-family:'Oswald',sans-serif;font-size:2.5rem;font-weight:700;color:var(--gold);line-height:1;display:block}
+        .counter-label{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;display:block}
+        .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
+        .svc{background:var(--dark2);padding:2.2rem 2rem;position:relative;overflow:hidden;transition:background 0.3s,transform 0.3s;cursor:default}
+        .svc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.05) 0%,transparent 60%);opacity:0;transition:opacity 0.3s}
+        .svc:hover{background:var(--mid);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,0.4)} .svc:hover::after{opacity:1}
+        .svc-icon{font-size:1.5rem;margin-bottom:0.8rem;display:block}
+        .svc-num{font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:rgba(201,168,76,0.08);line-height:1;position:absolute;top:1rem;right:1.5rem}
+        .svc-name{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--light);margin-bottom:0.7rem}
+        .svc-desc{font-size:0.83rem;color:var(--muted);line-height:1.7;margin-bottom:1.8rem}
+        .svc-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.05);padding-top:1.2rem}
+        .svc-price{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold)}
+        .svc-time{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.15em;color:var(--muted);display:flex;align-items:center;gap:4px}
+        .agenda-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(255,255,255,0.04)}
+        .dcard{background:var(--dark2);padding:1.8rem 0.5rem;text-align:center;position:relative;transition:background 0.2s,transform 0.2s}
+        .dcard:not(.closed):hover{background:var(--mid);transform:translateY(-3px)}
+        .dcard.closed{opacity:0.35}
+        .dcard.closed::after{content:'FECHADO';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font-family:'Barlow Condensed',sans-serif;font-size:0.52rem;font-weight:700;letter-spacing:0.15em;color:var(--red);border:1px solid var(--red);padding:0.15rem 0.4rem;white-space:nowrap}
+        .dname{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem}
+        .dhours{font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--light);line-height:1.6} .dhours .end{display:block;font-size:0.75rem;color:var(--muted)}
+        .jeff-section{display:grid;grid-template-columns:45% 55%;min-height:700px}
+        .jeff-img-side{position:relative;overflow:hidden}
+        .jeff-full{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:grayscale(10%) contrast(1.12) brightness(0.8);transition:transform 0.8s,filter 0.5s}
+        .jeff-img-side:hover .jeff-full{transform:scale(1.04);filter:grayscale(0%) contrast(1.08) brightness(0.85)}
+        .jeff-ov1{position:absolute;inset:0;background:radial-gradient(ellipse at 40% 50%,transparent 30%,rgba(0,0,0,0.5) 100%);z-index:2;pointer-events:none}
+        .jeff-ov2{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,#0A0A0A 100%);z-index:3;pointer-events:none}
+        .jeff-ov3{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top,rgba(0,0,0,0.4),transparent);z-index:3;pointer-events:none}
+        .jeff-accent{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(to right,transparent,var(--gold) 25%,transparent);z-index:5;pointer-events:none}
+        .jeff-text-wrap{background:#0A0A0A;display:flex;flex-direction:column;justify-content:center;padding:5rem 4.5rem}
+        .jeff-quote-big{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:300;font-style:italic;line-height:1.5;color:var(--light);position:relative;padding-left:1.5rem;margin-bottom:2rem}
+        .jeff-quote-big::before{content:'"';position:absolute;left:-0.3rem;top:-1rem;font-size:5rem;color:var(--gold);line-height:1;font-family:'Oswald',sans-serif;font-style:normal;opacity:0.6}
+        .jeff-name-big{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold)}
+        .jeff-role-big{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem}
+        .jeff-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.06)}
+        .jspec-l{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:0.25rem}
+        .jspec-v{font-family:'Oswald',sans-serif;font-size:0.95rem;color:var(--light)}
+        .test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
+        .tcard{background:var(--dark2);padding:2.2rem;position:relative;transition:background 0.2s,transform 0.2s}
+        .tcard:hover{background:var(--mid);transform:translateY(-3px)}
+        .tcard-quote{position:absolute;top:1rem;right:1.5rem;font-family:'Oswald',sans-serif;font-size:5rem;color:rgba(201,168,76,0.06);line-height:1;pointer-events:none}
+        .tavatar{width:46px;height:46px;border-radius:50%;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:1rem}
+        .tstars{display:flex;gap:3px;margin-bottom:1rem}
+        .ttext{font-size:0.9rem;color:var(--muted);line-height:1.75;font-style:italic;margin-bottom:1.2rem}
+        .tname{font-family:'Oswald',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.06em;color:var(--light)}
+        .ttime{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.15em;color:var(--muted);margin-top:0.2rem}
+        .contact-layout{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+        .citem{display:flex;align-items:flex-start;gap:1rem;margin-bottom:2rem}
+        .cicon{width:44px;height:44px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.18);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+        .citem:hover .cicon{background:rgba(201,168,76,0.15);border-color:var(--gold)}
+        .clabel{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem}
+        .cval{font-size:0.9rem;color:var(--muted);line-height:1.7} .cval a{color:var(--muted);text-decoration:none;transition:color 0.2s} .cval a:hover{color:var(--gold)}
+        .sched-tbl{width:100%;border-collapse:collapse} .sched-tbl td{padding:0.65rem 0;font-size:0.88rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .sched-tbl td:first-child{color:var(--muted)} .sched-tbl td:last-child{text-align:right;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.05em}
+        .sched-tbl .closed-row td{color:rgba(192,57,43,0.7)!important}
+        .cbox{background:var(--mid);border:1px solid rgba(201,168,76,0.12);border-radius:3px;padding:2.5rem;position:relative;overflow:hidden}
+        .cbox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--gold-d),var(--gold),var(--gold-d))}
+        .footer{background:var(--dark2);border-top:1px solid rgba(201,168,76,0.1)}
+        .footer-main{max-width:1280px;margin:0 auto;padding:4rem 2.5rem 3rem;display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:3rem}
+        .footer-col-t{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
+        .footer-txt{font-size:0.875rem;color:var(--muted);line-height:2}
+        .footer-bottom{border-top:1px solid rgba(255,255,255,0.04);padding:1.5rem 2.5rem;max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;color:rgba(154,144,128,0.45)}
+        .fbadge{font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.12);padding:0.25rem 0.8rem}
+        .amenities{background:var(--mid);border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);padding:2rem 2.5rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.5rem}
+        .amen{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color 0.2s} .amen:hover{color:var(--gold)}
+        .glow-cursor{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease}
+        @media(max-width:1024px){
+          .hero{grid-template-columns:1fr} .hero-right{justify-content:flex-start;padding:2rem 2.5rem 4rem} .hero-left{padding:8rem 2.5rem 2rem}
+          .jeff-portrait-wrap{width:280px} .jeff-floating-badge,.jeff-floating-stars{display:none}
+          .svcs{grid-template-columns:repeat(2,1fr)} .about-layout{grid-template-columns:1fr;gap:3rem}
+          .jeff-section{grid-template-columns:1fr} .jeff-img-side{min-height:500px} .jeff-ov2{background:linear-gradient(to top,#0A0A0A 0%,transparent 50%)}
+          .jeff-text-wrap{padding:3rem 2.5rem} .test-grid{grid-template-columns:1fr 1fr} .footer-main{grid-template-columns:1fr 1fr}
+        }
+        @media(max-width:768px){
+          .nav-links{display:none} .hamburger{display:block}
+          .hero-left{padding:7rem 1.5rem 2rem} .hero-right{padding:2rem 1.5rem 4rem} .jeff-portrait-wrap{width:100%;max-width:320px}
+          .sec{padding:5rem 0} .inner{padding:0 1.5rem} .svcs{grid-template-columns:1fr} .agenda-wrap{grid-template-columns:repeat(4,1fr)}
+          .test-grid{grid-template-columns:1fr} .contact-layout{grid-template-columns:1fr;gap:2.5rem}
+          .footer-main{grid-template-columns:1fr;gap:2rem;padding:3rem 1.5rem 2rem} .footer-bottom{flex-direction:column;gap:1rem;text-align:center;padding:1.5rem}
+          .jeff-grid{grid-template-columns:1fr} .counters{grid-template-columns:repeat(3,1fr)} .hero-actions{flex-direction:column;align-items:flex-start}
+          .hero-h1{font-size:clamp(2.8rem,9vw,4.5rem)}
+        }
+        @media(max-width:480px){.agenda-wrap{grid-template-columns:repeat(3,1fr)} .hero-h1{font-size:clamp(2.5rem,10vw,3.5rem)}}
+      `}</style>
+
+      <div className="glow-cursor" style={{ left:`${mousePos.x*100}%`, top:`${mousePos.y*100}%` }} />
+
+      <div className={`mmenu ${mobileOpen?'open':''}`}>
+        <button className="mmenu-close" onClick={()=>setMobileOpen(false)}><X size={30}/></button>
+        {navLinks.map(l=><button key={l.id} className="mmenu-link" onClick={()=>scrollTo(l.id)}>{l.label}</button>)}
+        <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'1rem',padding:'1rem 2.5rem'}}><Calendar size={18}/> Agendar Agora</a>
+      </div>
+
+      <nav className={`nav ${scrolled?'scrolled':''}`}>
+        <div className="nav-inner">
+          <div className="nav-logo" onClick={()=>scrollTo('home')}>
+            <img src={logoImage} alt="Trend Blade"/>
+            <span className="logo-text">TREND <span>BLADE</span></span>
+          </div>
+          <ul className="nav-links">
+            {navLinks.map(l=><li key={l.id}><button className={`nl ${activeSection===l.id?'active':''}`} onClick={()=>scrollTo(l.id)}>{l.label}</button></li>)}
+            <li><a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="nl nav-cta bc">Agendar</a></li>
+          </ul>
+          <button className="hamburger" onClick={()=>setMobileOpen(true)}><Menu size={22}/></button>
+        </div>
+      </nav>
+
+      <section id="home" className="hero">
+        <div className="hero-bg"/><ParticleField/>
+        <div className="hero-left" style={{opacity:heroReady?1:0,transform:heroReady?'none':'translateY(30px)',transition:'all 0.9s cubic-bezier(.16,1,.3,1)'}}>
+          <div className="hero-badge">✦ Barbearia Premium · Guarulhos, SP</div>
+          <h1 className="hero-h1"><span style={{display:'block'}}>Estilo &amp;</span><span className="gold">Precisão</span><span className="outline">Redefinidos</span></h1>
+          <p className="hero-sub">Mais que um corte — uma experiência premium. Transformamos seu visual com técnica, estilo e o melhor atendimento de Guarulhos.</p>
+          <div className="hero-stars">
+            {[...Array(5)].map((_,i)=><Star key={i} size={14} fill="#C9A84C" color="#C9A84C"/>)}
+            <span style={{fontFamily:'Oswald',fontSize:'1rem',color:'#C9A84C',marginLeft:4}}>5.0</span>
+            <span style={{fontSize:'0.82rem',color:'#9A9080'}}>· 145 avaliações no Google</span>
+          </div>
+          <div className="hero-actions">
+            <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16}/> Agendar Agora</a>
+            <button className="btn-o" onClick={()=>scrollTo('servicos')}><Scissors size={16}/> Ver Serviços</button>
+          </div>
+        </div>
+        <div className="hero-right" style={{opacity:heroReady?1:0,transition:'opacity 1.2s ease 0.4s'}}>
+          <div className="jeff-portrait-wrap">
+            <div className="jeff-gold-border"/>
+            <div className="jeff-portrait-frame">
+              <img className="jeff-portrait-img" src={jeffersonImage} alt="Jefferson — Fundador Trend Blade"
+                   onError={e=>{e.target.parentElement.style.background='linear-gradient(180deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px';e.target.style.display='none'}}/>
+            </div>
+            <div className="jeff-label"><div className="jeff-label-name">Jefferson</div><div className="jeff-label-role">Fundador & Master Barber</div></div>
+            <div className="jeff-deco-line"/>
+            <div className="jeff-floating-badge">Master Barber ✦</div>
+            <div className="jeff-floating-stars">
+              <div style={{display:'flex',gap:2}}>{[...Array(5)].map((_,i)=><Star key={i} size={10} fill="#C9A84C" color="#C9A84C"/>)}</div>
+              <div style={{fontFamily:'Oswald',fontSize:'0.7rem',color:'#C9A84C',marginTop:2}}>5.0/5</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="band"><div className="band-track">{[...Array(10)].map((_,i)=><React.Fragment key={i}><span className="band-item"><span className="band-dot"/>Corte Premium</span><span className="band-item"><span className="band-dot"/>Barba Clássica</span><span className="band-item"><span className="band-dot"/>5.0 Google</span><span className="band-item"><span className="band-dot"/>Guarulhos SP</span></React.Fragment>)}</div></div>
+
+      <section id="sobre" className="sec" style={{background:'#0F0F0F'}}>
+        <div className="inner">
+          <div className="about-layout">
+            <Reveal>
+              <div className="stag">Nossa história</div><h2 className="stitle">Sobre a <span>Trend Blade</span></h2><div className="sdiv"/>
+              <div className="about-text"><p>Localizada no coração de Guarulhos, a Trend Blade Barbearia nasceu da paixão por transformar o cuidado masculino em uma experiência única. Combinamos técnicas tradicionais com tendências modernas.</p><p>Cada cliente que entra pela nossa porta é tratado com atenção personalizada, em um ambiente aconchegante onde estilo, conforto e qualidade se encontram.</p></div>
+              <div className="counters">
+                <div className="counter-box"><span className="counter-num"><Counter target={5} suffix=".0"/></span><span className="counter-label">Nota Google</span></div>
+                <div className="counter-box"><span className="counter-num"><Counter target={145} suffix="+"/></span><span className="counter-label">Avaliações</span></div>
+                <div className="counter-box"><span className="counter-num"><Counter target={10} suffix="+"/></span><span className="counter-label">Anos exp.</span></div>
+              </div>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <div className="about-cards">
+                {[{icon:Award,title:'Experiência Premium',text:'Cada cliente recebe atenção personalizada em um ambiente sofisticado e aconchegante.'},{icon:Scissors,title:'Técnica Apurada',text:'Profissionais sempre atualizados com as últimas tendências e técnicas de barbearia.'},{icon:Heart,title:'Ambiente Familiar',text:'Um espaço acolhedor onde você se sente em casa — tranquilo, confortável e exclusivo.'},{icon:Users,title:'Atendimento Dedicado',text:'Cada visita é única. Conhecemos você, seu estilo e suas preferências pessoais.'}].map((c,i)=>(
+                  <div key={i} className="acard"><div className="acard-icon"><c.icon size={18}/></div><div className="acard-title">{c.title}</div><div className="acard-text">{c.text}</div></div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <section id="servicos" className="sec" style={{background:'#0A0A0A'}}>
+        <div className="inner">
+          <Reveal><div className="stag">O que oferecemos</div><h2 className="stitle">Nossos <span>Serviços</span></h2><div className="sdiv"/></Reveal>
+          <div className="svcs">{services.map((s,i)=><Reveal key={i} delay={i*0.07}><div className="svc"><div className="svc-num">{s.num}</div><span className="svc-icon">{s.icon}</span><div className="svc-name">{s.name}</div><div className="svc-desc">{s.desc}</div><div className="svc-footer"><div className="svc-price">{s.price}</div><div className="svc-time"><Clock size={11}/>{s.time}</div></div></div></Reveal>)}</div>
+          <Reveal delay={0.3}><div style={{marginTop:'3rem',display:'flex',gap:'1rem',flexWrap:'wrap'}}><a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16}/> Agendar pelo Booksy</a><a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o"><Phone size={16}/> WhatsApp</a></div></Reveal>
+        </div>
+      </section>
+
+      <section id="agenda" className="sec" style={{background:'#0F0F0F'}}>
+        <div className="inner">
+          <Reveal><div className="stag">Funcionamento</div><h2 className="stitle">Horários de <span>Atendimento</span></h2><div className="sdiv"/></Reveal>
+          <Reveal delay={0.1}>
+            <div className="agenda-wrap">{schedule.map((d,i)=><div key={i} className={`dcard ${d.closed?'closed':''}`}><div className="dname">{d.day}</div>{!d.closed?<div className="dhours">{d.hours}<span className="end">{d.end}</span></div>:<div className="dhours" style={{color:'#9A9080'}}>—</div>}</div>)}</div>
+            <p style={{marginTop:'1.5rem',fontSize:'0.78rem',color:'#9A9080',letterSpacing:'0.04em'}}>* Domingo e Segunda-feira: fechado. Agendamentos via Booksy ou WhatsApp.</p>
+          </Reveal>
+        </div>
+      </section>
+
+      <div className="jeff-section">
+        <div className="jeff-img-side">
+          <img className="jeff-full" src={jeffersonImage} alt="Jefferson — Master Barber" onError={e=>{e.target.style.display='none';e.target.parentElement.style.background='linear-gradient(135deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px'}}/>
+          <div className="jeff-ov1"/><div className="jeff-ov2"/><div className="jeff-ov3"/><div className="jeff-accent"/>
+        </div>
+        <div className="jeff-text-wrap">
+          <Reveal dir="right">
+            <div className="stag">O mestre por trás da arte</div>
+            <div className="jeff-quote-big">Barbearia não é só corte de cabelo. É o lugar onde o homem cuida de si mesmo, com orgulho e confiança.</div>
+            <div className="jeff-name-big">Jefferson</div><div className="jeff-role-big">Fundador & Master Barber — Trend Blade Barbearia</div>
+            <div className="jeff-grid">{[{l:'Especialidade',v:'Cortes Degradê & Barba'},{l:'Localização',v:'Guarulhos, SP'},{l:'Agendamento',v:'Booksy & WhatsApp'},{l:'Atendimento',v:'Terça → Sábado'}].map((s,i)=><div key={i}><div className="jspec-l">{s.l}</div><div className="jspec-v">{s.v}</div></div>)}</div>
+            <div style={{marginTop:'2.5rem',display:'flex',gap:'1rem',flexWrap:'wrap'}}><a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'0.82rem'}}><Calendar size={14}/> Agendar</a><a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{fontSize:'0.82rem'}}><Phone size={14}/> WhatsApp</a></div>
+          </Reveal>
+        </div>
+      </div>
+
+      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>)}</div>
+
+      <section id="depoimentos" className="sec" style={{background:'#0F0F0F'}}>
+        <div className="inner">
+          <Reveal><div className="stag">Clientes satisfeitos</div><h2 className="stitle">O que nossos <span>clientes</span> dizem</h2><div className="sdiv"/></Reveal>
+          <div className="test-grid">{testimonials.map((t,i)=><Reveal key={i} delay={i*0.1}><div className="tcard"><div className="tcard-quote">"</div><div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}><div className="tavatar">{t.initial}</div><div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div></div><div className="tstars">{[...Array(t.rating)].map((_,j)=><Star key={j} size={12} fill="#C9A84C" color="#C9A84C"/>)}</div><div className="ttext">"{t.text}"</div></div></Reveal>)}</div>
+        </div>
+      </section>
+
+      <section id="contato" className="sec" style={{background:'#0A0A0A'}}>
+        <div className="inner">
+          <Reveal><div className="stag">Fale conosco</div><h2 className="stitle">Entre em <span>Contato</span></h2><div className="sdiv"/></Reveal>
+          <div className="contact-layout">
+            <Reveal>
+              {[{icon:MapPin,label:'Endereço',val:'Av Papa Pio XII, nº 218\nGuarulhos, São Paulo'},{icon:Phone,label:'WhatsApp',val:'(11) 95123-1443',href:'https://wa.me/5511951231443'},{icon:Instagram,label:'Instagram',val:'@trendbladebarbearia',href:'https://instagram.com/trendbladebarbearia'}].map((c,i)=>(
+                <div key={i} className="citem"><div className="cicon"><c.icon size={18} color="#C9A84C"/></div><div><div className="clabel">{c.label}</div>{c.href?<div className="cval"><a href={c.href} target="_blank" rel="noopener noreferrer">{c.val}</a></div>:<div className="cval" style={{whiteSpace:'pre-line'}}>{c.val}</div>}</div></div>
+              ))}
+              <div className="citem"><div className="cicon"><Clock size={18} color="#C9A84C"/></div><div style={{flex:1}}><div className="clabel">Horários</div><table className="sched-tbl"><tbody><tr className="closed-row"><td>Domingo</td><td>Fechado</td></tr><tr className="closed-row"><td>Segunda</td><td>Fechado</td></tr><tr><td>Terça a Sexta</td><td>09h às 19h</td></tr><tr><td>Sábado</td><td>08h às 17h</td></tr></tbody></table></div></div>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <div className="cbox">
+                <div style={{fontFamily:'Oswald',fontSize:'1.1rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',color:'#C9A84C',marginBottom:'1.5rem'}}>Agende seu Horário</div>
+                <div style={{display:'flex',flexDirection:'column',gap:'0.8rem',marginBottom:'2rem'}}>
+                  <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g" style={{justifyContent:'center'}}><Calendar size={16}/> Agendar pelo Booksy</a>
+                  <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{justifyContent:'center'}}><Phone size={16}/> WhatsApp</a>
+                </div>
+                <div style={{borderTop:'1px solid rgba(255,255,255,0.06)',paddingTop:'1.5rem'}}>
+                  <div style={{fontFamily:'Barlow Condensed',fontSize:'0.65rem',letterSpacing:'0.25em',textTransform:'uppercase',color:'#C9A84C',marginBottom:'1rem'}}>Por que nos escolher</div>
+                  {['Profissionais especializados e dedicados','Ambiente familiar e aconchegante','Técnicas modernas e tradicionais','Atendimento personalizado','Localização privilegiada em Guarulhos'].map((item,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:'0.6rem',fontSize:'0.875rem',color:'#9A9080'}}><span style={{color:'#C9A84C',fontSize:'0.6rem'}}>✦</span>{item}</div>)}
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <footer className="footer">
+        <div className="footer-main">
+          <div><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:'1rem'}}><img src={logoImage} alt="Trend Blade" style={{height:36,width:'auto'}}/><span style={{fontFamily:'Oswald',fontWeight:700,fontSize:'1.2rem',letterSpacing:'0.1em',color:'#C9A84C'}}>TREND <span style={{color:'#F5F0E8'}}>BLADE</span></span></div><p className="footer-txt">Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento familiar diferenciado.</p></div>
+          <div><div className="footer-col-t">Contato</div><div className="footer-txt">(11) 95123-1443<br/>@trendbladebarbearia<br/>Av Papa Pio XII, nº 218<br/>Guarulhos, SP</div></div>
+          <div><div className="footer-col-t">Horários</div><div className="footer-txt"><span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>Ter a Sex — 09h às 19h<br/>Sáb — 08h às 17h</div></div>
+        </div>
+        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><span>© 2025 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><div className="fbadge">Homologação</div></div></div>
+      </footer>
+    </div>
+  )
+}
+```
+
+---
+
+## PASSO 3 — VERIFICAR SE A FOTO DO JEFFERSON EXISTE
+
+Verifique se o arquivo `src/assets/jefferson.jpg` existe:
+
+```bash
+ls src/assets/
+```
+
+**Se NÃO existir** — baixe a foto do WhatsApp do Jefferson (a foto de perfil profissional com fundo cinza, camisa marrom, braços cruzados) e salve como `src/assets/jefferson.jpg`.
+
+**Se existir com outro nome** (ex: `jefferson.jpg.jpeg`) — renomeie:
+
+```bash
+cp src/assets/jefferson.jpg.jpeg src/assets/jefferson.jpg
+```
+
+---
+
+## PASSO 4 — COMMIT E PUSH
+
+```bash
+git add src/App.jsx src/assets/jefferson.jpg
+git commit -m "homologacao: site premium final - UX completo, foto portrait, particulas, responsivo"
+git push origin homologacao
+```
+
+---
+
+## PASSO 5 — AGUARDAR BUILD NO VERCEL
+
+Após o push, aguarde 1-2 minutos e acesse:
+👉 https://trendblade-barbearia-git-homologacao-erick-brendals-projects.vercel.app
+
+O Vercel fará o build automaticamente ao detectar o push na branch `homologacao`.
+
+---
+
+## PASSO 6 — VERIFICAR SE DEU CERTO
+
+Acesse o link acima e confirme:
+- ✅ Hero com foto do Jefferson em formato retrato (sem corte)
+- ✅ Partículas douradas animadas no fundo
+- ✅ Faixa marquee dourada animada entre seções
+- ✅ Agenda com Domingo e Segunda marcados como FECHADO
+- ✅ Menu hambúrguer funcionando no mobile
+- ✅ Site responsivo em todas as telas
+
+---
+
+## IMPORTANTE
+
+- ⚠️ NÃO faça merge para a branch `main`
+- ⚠️ NÃO altere nenhum outro arquivo além de `src/App.jsx` e `src/assets/jefferson.jpg`
