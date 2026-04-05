@@ -293,7 +293,7 @@ export default function App() {
         }
         @media(max-width:768px){
           .nav-links{display:none} .hamburger{display:block}
-          .hero{padding:100px 1.5rem 2rem;min-height:auto} .hero-left{padding:0} .hero-right{padding:2rem 0 4rem} .jeff-portrait-wrap{width:100%;max-width:320px}
+          .hero{padding:100px 1.5rem 3rem;min-height:auto;gap:3rem} .hero-left{padding:0} .hero-right{padding:3rem 0 4rem;justify-content:center} .jeff-portrait-wrap{width:100%;max-width:300px;margin:0 auto}
           .sec{padding:3rem 1.5rem} .inner{padding:0} .svcs{grid-template-columns:1fr} .agenda-wrap{grid-template-columns:repeat(4,1fr)}
           .test-grid{grid-template-columns:1fr} .contact-layout{grid-template-columns:1fr;gap:2.5rem}
           .stitle{font-size:2rem;margin-bottom:2rem}
@@ -303,11 +303,13 @@ export default function App() {
           .jeff-grid{grid-template-columns:1fr} .counters{grid-template-columns:repeat(3,1fr)}
         }
         @media(max-width:480px){
-          .hero{padding:90px 1rem 2rem}
+          .hero{padding:90px 1rem 2.5rem;gap:2.5rem}
           .hero-h1{font-size:1.8rem}
           .hero-sub{font-size:0.95rem}
           .hero-actions{flex-direction:column;align-items:flex-start}
           .btn-g,.btn-o{width:100%}
+          .hero-right{padding:2.5rem 0 3rem!important}
+          .jeff-portrait-wrap{width:240px;height:320px;margin:0 auto}
           .sec{padding:2.5rem 1rem}
           .stitle{font-size:1.6rem}
           .svcs{grid-template-columns:1fr}
@@ -315,7 +317,6 @@ export default function App() {
           .test-grid{grid-template-columns:1fr}
           .contact-layout{grid-template-columns:1fr;gap:2rem}
           .footer-main{grid-template-columns:1fr;gap:1.5rem;padding:2rem 1rem 1.5rem}
-          .jeff-portrait-wrap{width:220px;height:290px}
           .about-layout{gap:2rem}
           .counters{grid-template-columns:1fr}
         }
