@@ -469,7 +469,7 @@ export default function App() {
           <div><div className="footer-col-t">Contato</div><div className="footer-txt">(11) 95123-1443<br/>@trendbladebarbearia<br/>Av Papa Pio XII, nº 218<br/>Guarulhos, SP</div></div>
           <div><div className="footer-col-t">Horários</div><div className="footer-txt"><span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>Ter a Sex — 09h às 19h<br/>Sáb — 08h às 17h</div></div>
         </div>
-        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><span>© 2025 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><div className="fbadge">Homologação</div></div></div>
+        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><div><span>© 2026 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><br/><span style={{fontSize:'0.65rem',color:'rgba(154,144,128,0.6)',marginTop:'0.5rem',display:'block'}}>Desenvolvido por <a href="https://www.eblsolucoescorp.tec.br/" target="_blank" rel="noopener noreferrer" style={{color:'var(--gold)',textDecoration:'none',transition:'color 0.2s'}} onMouseEnter={(e)=>e.target.style.color='var(--gold-l)'} onMouseLeave={(e)=>e.target.style.color='var(--gold)'}>@erickAlmida</a></span></div><div className="fbadge">Homologação</div></div></div>
       </footer>
     </div>
   )
