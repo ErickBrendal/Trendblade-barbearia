@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors, ChevronDown, Menu, X } from 'lucide-react'
+import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors, ChevronDown, Menu, X, Award, Users, Heart } from 'lucide-react'
 import logoImage from './assets/IMG_7057.jpg'
 import jeffersonImage from './assets/jefferson.jpg'
 import './App.css'
 
-function useInView(threshold = 0.15) {
+function useInView(threshold = 0.12) {
   const ref = useRef(null)
   const [inView, setInView] = useState(false)
   useEffect(() => {
@@ -15,677 +15,697 @@ function useInView(threshold = 0.15) {
   return [ref, inView]
 }
 
-function AnimatedSection({ children, className = '', style = {}, delay = 0 }) {
+function Reveal({ children, delay = 0, dir = 'up', className = '', style = {} }) {
   const [ref, inView] = useInView()
+  const transforms = { up: 'translateY(40px)', left: 'translateX(-40px)', right: 'translateX(40px)', scale: 'scale(0.92)' }
   return (
     <div ref={ref} className={className} style={{
       ...style,
       opacity: inView ? 1 : 0,
-      transform: inView ? 'translateY(0)' : 'translateY(32px)',
-      transition: `opacity 0.7s ease ${delay}s, transform 0.7s ease ${delay}s`
+      transform: inView ? 'none' : transforms[dir],
+      transition: `opacity 0.8s cubic-bezier(.16,1,.3,1) ${delay}s, transform 0.8s cubic-bezier(.16,1,.3,1) ${delay}s`
     }}>
       {children}
     </div>
   )
 }
 
+function ParticleField() {
+  const canvasRef = useRef(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    let W = canvas.width = window.innerWidth
+    let H = canvas.height = window.innerHeight
+    const particles = Array.from({ length: 55 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      o: Math.random() * 0.5 + 0.1
+    }))
+    let raf
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H)
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(201,168,76,${p.o})`
+        ctx.fill()
+      })
+      particles.forEach((a, i) => particles.slice(i + 1).forEach(b => {
+        const d = Math.hypot(a.x - b.x, a.y - b.y)
+        if (d < 120) {
+          ctx.beginPath()
+          ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y)
+          ctx.strokeStyle = `rgba(201,168,76,${0.08 * (1 - d / 120)})`
+          ctx.lineWidth = 0.5; ctx.stroke()
+        }
+      }))
+      raf = requestAnimationFrame(draw)
+    }
+    draw()
+    const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight }
+    window.addEventListener('resize', onResize)
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize) }
+  }, [])
+  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />
+}
+
+function Counter({ target, suffix = '', duration = 2000 }) {
+  const [count, setCount] = useState(0)
+  const [ref, inView] = useInView(0.5)
+  useEffect(() => {
+    if (!inView) return
+    let start = 0
+    const step = target / (duration / 16)
+    const timer = setInterval(() => {
+      start += step
+      if (start >= target) { setCount(target); clearInterval(timer) }
+      else setCount(Math.floor(start))
+    }, 16)
+    return () => clearInterval(timer)
+  }, [inView, target, duration])
+  return <span ref={ref}>{count}{suffix}</span>
+}
+
 export default function App() {
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [heroLoaded, setHeroLoaded] = useState(false)
+  const [heroReady, setHeroReady] = useState(false)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
-    setTimeout(() => setHeroLoaded(true), 100)
+    setTimeout(() => setHeroReady(true), 200)
     const onScroll = () => {
       setScrolled(window.scrollY > 60)
-      const sections = ['home','sobre','servicos','agenda','depoimentos','contato']
-      for (const id of [...sections].reverse()) {
+      const ids = ['home','sobre','servicos','agenda','depoimentos','contato']
+      for (const id of [...ids].reverse()) {
         const el = document.getElementById(id)
-        if (el && window.scrollY >= el.offsetTop - 120) { setActiveSection(id); break }
+        if (el && window.scrollY >= el.offsetTop - 130) { setActiveSection(id); break }
       }
     }
+    const onMouse = (e) => setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight })
     window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('mousemove', onMouse)
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('mousemove', onMouse) }
   }, [])
 
-  const scrollTo = (id) => {
-    setMobileOpen(false)
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-  }
+  const scrollTo = (id) => { setMobileOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
 
   const services = [
-    { num: '01', name: 'Corte Clássico', desc: 'Tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização.', price: 'R$ 45', time: '30min' },
-    { num: '02', name: 'Barba Completa', desc: 'Modelagem, toalha quente e finalização com óleo premium para cuidado total.', price: 'R$ 40', time: '30min' },
-    { num: '03', name: 'Corte + Barba', desc: 'O combo completo com desconto especial. Transformação total em uma visita.', price: 'R$ 75', time: '1h' },
-    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso com design de sobrancelha masculina para um visual definido.', price: 'R$ 55', time: '30min' },
-    { num: '05', name: 'Corte + Hidratação', desc: 'Combinação perfeita de estilo e tratamento capilar com produtos premium.', price: 'R$ 60', time: '45min' },
-    { num: '06', name: 'Pacote Completo', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa.', price: 'R$ 80', time: '1h30' },
+    { num: '01', name: 'Corte Clássico', desc: 'Tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
+    { num: '02', name: 'Barba Completa', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
+    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
+    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
+    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '45min', icon: '✨' },
+    { num: '06', name: 'Pacote Completo', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h30', icon: '👑' },
   ]
 
   const schedule = [
-    { day: 'Dom', short: 'D', closed: true },
-    { day: 'Seg', short: 'S', closed: true },
-    { day: 'Ter', short: 'T', hours: '09h–19h', closed: false },
-    { day: 'Qua', short: 'Q', hours: '09h–19h', closed: false },
-    { day: 'Qui', short: 'Q', hours: '09h–19h', closed: false },
-    { day: 'Sex', short: 'S', hours: '09h–19h', closed: false },
-    { day: 'Sáb', short: 'S', hours: '08h–17h', closed: false },
+    { day: 'Dom', closed: true },
+    { day: 'Seg', closed: true },
+    { day: 'Ter', hours: '09h', end: '19h', closed: false },
+    { day: 'Qua', hours: '09h', end: '19h', closed: false },
+    { day: 'Qui', hours: '09h', end: '19h', closed: false },
+    { day: 'Sex', hours: '09h', end: '19h', closed: false },
+    { day: 'Sáb', hours: '08h', end: '17h', closed: false },
   ]
 
   const testimonials = [
-    { name: 'Carlos Silva', rating: 5, text: 'Atendimento impecável! O melhor corte que já fiz em Guarulhos. Profissional de verdade.', initial: 'C' },
-    { name: 'Roberto Santos', rating: 5, text: 'Ambiente aconchegante e profissional muito dedicado. Já indiquei para vários amigos!', initial: 'R' },
-    { name: 'André Costa', rating: 5, text: 'Profissional caprichoso e atencioso. Sempre saio satisfeito e com o visual impecável.', initial: 'A' },
+    { name: 'Carlos Silva', rating: 5, text: 'Atendimento impecável! O melhor corte que já fiz em Guarulhos. Me sinto renovado a cada visita.', initial: 'C', time: 'há 2 dias' },
+    { name: 'Roberto Santos', rating: 5, text: 'Ambiente aconchegante, profissional extremamente dedicado. Já indiquei para toda a minha família!', initial: 'R', time: 'há 1 semana' },
+    { name: 'André Costa', rating: 5, text: 'Caprichoso e atencioso em cada detalhe. Sempre saio satisfeito e com o visual perfeito.', initial: 'A', time: 'há 2 semanas' },
   ]
 
   const navLinks = [
-    { id: 'home', label: 'Início' },
-    { id: 'sobre', label: 'Sobre' },
-    { id: 'servicos', label: 'Serviços' },
-    { id: 'agenda', label: 'Agenda' },
-    { id: 'depoimentos', label: 'Avaliações' },
-    { id: 'contato', label: 'Contato' },
+    { id: 'home', label: 'Início' }, { id: 'sobre', label: 'Sobre' },
+    { id: 'servicos', label: 'Serviços' }, { id: 'agenda', label: 'Agenda' },
+    { id: 'depoimentos', label: 'Avaliações' }, { id: 'contato', label: 'Contato' },
   ]
 
   return (
-    <div style={{ fontFamily: "'Barlow', sans-serif", background: '#0D0D0D', color: '#F5F0E8', overflowX: 'hidden' }}>
+    <div style={{ fontFamily:"'Barlow',sans-serif", background:'#0A0A0A', color:'#F5F0E8', overflowX:'hidden' }}>
       <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
-
       <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        :root {
-          --gold: #C9A84C; --gold-l: #E8C96A; --gold-d: #8B6914;
-          --dark: #0D0D0D; --dark2: #111111; --mid: #1A1A1A; --mid2: #222222;
-          --muted: #9A9080; --light: #F5F0E8; --red: #8B1A1A;
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        :root{
+          --gold:#C9A84C;--gold-l:#E8C96A;--gold-d:#8B6914;
+          --dark:#0A0A0A;--dark2:#0F0F0F;--mid:#181818;--mid2:#202020;
+          --muted:#9A9080;--light:#F5F0E8;--red:#c0392b;
         }
-        .oswald { font-family: 'Oswald', sans-serif; }
-        .bc { font-family: 'Barlow Condensed', sans-serif; }
+        .oswald{font-family:'Oswald',sans-serif}
+        .bc{font-family:'Barlow Condensed',sans-serif}
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:#0A0A0A}
+        ::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
 
         /* NAV */
-        .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; transition: all 0.3s; }
-        .nav.scrolled { background: rgba(13,13,13,0.97); backdrop-filter: blur(16px); box-shadow: 0 1px 0 rgba(201,168,76,0.15); }
-        .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 2rem; height: 70px; display: flex; align-items: center; justify-content: space-between; }
-        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .nav-logo img { height: 36px; width: auto; }
-        .nav-logo-text { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.25rem; letter-spacing: 0.1em; color: var(--gold); }
-        .nav-logo-text span { color: var(--light); }
-        .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
-        .nav-link { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 0; }
-        .nav-link:hover, .nav-link.active { color: var(--gold); }
-        .nav-cta { background: var(--gold); color: var(--dark) !important; padding: 0.5rem 1.4rem; border-radius: 2px; font-weight: 700; }
-        .nav-cta:hover { background: var(--gold-l); }
-        .hamburger { display: none; background: none; border: none; cursor: pointer; color: var(--light); padding: 4px; }
-        .mobile-menu { display: none; position: fixed; inset: 0; background: rgba(13,13,13,0.98); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
-        .mobile-menu.open { display: flex; }
-        .mobile-link { font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--light); background: none; border: none; cursor: pointer; transition: color 0.2s; }
-        .mobile-link:hover { color: var(--gold); }
-        .mobile-close { position: absolute; top: 1.5rem; right: 2rem; background: none; border: none; cursor: pointer; color: var(--muted); }
+        .nav{position:fixed;top:0;left:0;right:0;z-index:1000;transition:all 0.4s}
+        .nav.scrolled{background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.12);box-shadow:0 4px 30px rgba(0,0,0,0.4)}
+        .nav-inner{max-width:1280px;margin:0 auto;padding:0 2.5rem;height:72px;display:flex;align-items:center;justify-content:space-between}
+        .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+        .nav-logo img{height:38px;width:auto;transition:transform 0.3s}
+        .nav-logo:hover img{transform:rotate(-5deg) scale(1.05)}
+        .logo-text{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;letter-spacing:0.1em;color:var(--gold)}
+        .logo-text span{color:var(--light)}
+        .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+        .nl{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;transition:color 0.2s;padding:0;position:relative}
+        .nl::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
+        .nl:hover,.nl.active{color:var(--gold)}
+        .nl:hover::after,.nl.active::after{transform:scaleX(1)}
+        .nav-cta{background:var(--gold)!important;color:var(--dark)!important;padding:0.55rem 1.5rem;border-radius:2px;font-weight:700!important;letter-spacing:0.12em!important;transition:all 0.2s!important}
+        .nav-cta:hover{background:var(--gold-l)!important;transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.3)!important}
+        .nav-cta::after{display:none!important}
+        .hamburger{display:none;background:none;border:1px solid rgba(201,168,76,0.3);border-radius:2px;cursor:pointer;color:var(--light);padding:6px 8px;transition:all 0.2s}
+        .hamburger:hover{border-color:var(--gold);color:var(--gold)}
 
-        /* HERO */
-        .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; position: relative; overflow: hidden; }
-        .hero-left { display: flex; flex-direction: column; justify-content: center; padding: 8rem 3rem 6rem 6rem; position: relative; z-index: 2; }
-        .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(201,168,76,0.3); padding: 0.4rem 1rem; margin-bottom: 2rem; width: fit-content; }
-        .hero-h1 { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: clamp(3.5rem, 5.5vw, 6rem); line-height: 0.92; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 1.5rem; }
-        .hero-h1 .gold { color: var(--gold); }
-        .hero-sub { font-size: 1rem; color: var(--muted); line-height: 1.75; max-width: 380px; margin-bottom: 2rem; }
-        .hero-stars { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2.5rem; }
-        .hero-stars-label { font-size: 0.85rem; color: var(--muted); }
-        .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
-
-        /* HERO PHOTO */
-        .hero-right { position: relative; overflow: hidden; }
-        .jeff-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: grayscale(15%) contrast(1.1) brightness(0.78) sepia(10%); transition: transform 0.8s ease, filter 0.5s ease; display: block; }
-        .hero-right:hover .jeff-photo { transform: scale(1.04); filter: grayscale(5%) contrast(1.08) brightness(0.85) sepia(5%); }
-        .jeff-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 40%, transparent 30%, rgba(0,0,0,0.6) 100%); z-index: 2; pointer-events: none; }
-        .jeff-grad-left { position: absolute; inset: 0; background: linear-gradient(to right, rgba(13,13,13,0.85) 0%, rgba(13,13,13,0.2) 25%, transparent 50%); z-index: 3; pointer-events: none; }
-        .jeff-grad-bottom { position: absolute; inset: 0; background: linear-gradient(to top, rgba(13,13,13,0.7) 0%, transparent 40%); z-index: 3; pointer-events: none; }
-        .cinema-top { display: none; }
-        .cinema-bot { display: none; }
-        .jeff-geo { position: absolute; top: 50%; left: 2rem; transform: translateY(-50%); width: 2px; height: 90px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); z-index: 6; pointer-events: none; }
-        .jeff-tag { position: absolute; bottom: 80px; right: 2rem; z-index: 10; text-align: right; pointer-events: none; }
-        .jeff-tag-name { font-family: 'Oswald', sans-serif; font-weight: 300; font-size: 0.95rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); }
-        .jeff-tag-role { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
-        .jeff-tag-line { width: 32px; height: 1px; background: var(--gold); margin-left: auto; margin-top: 0.5rem; }
-        .scroll-hint { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+        /* MOBILE MENU */
+        .mmenu{position:fixed;inset:0;background:rgba(10,10,10,0.99);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
+        .mmenu.open{opacity:1;pointer-events:all}
+        .mmenu-link{font-family:'Oswald',sans-serif;font-size:2.5rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--light);background:none;border:none;cursor:pointer;transition:color 0.2s}
+        .mmenu-link:hover{color:var(--gold)}
+        .mmenu-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s}
+        .mmenu-close:hover{color:var(--gold)}
 
         /* BTNS */
-        .btn-g { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase; background: var(--gold); color: var(--dark); padding: 0.9rem 2rem; border: none; border-radius: 2px; cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.15s; }
-        .btn-g:hover { background: var(--gold-l); transform: translateY(-2px); }
-        .btn-o { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase; background: transparent; color: var(--gold); padding: 0.9rem 2rem; border: 1px solid rgba(201,168,76,0.4); border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
-        .btn-o:hover { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.7); }
+        .btn-g{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--gold);color:var(--dark);padding:0.95rem 2.2rem;border:none;border-radius:2px;cursor:pointer;text-decoration:none;transition:all 0.25s;position:relative;overflow:hidden}
+        .btn-g::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,0.15) 50%,transparent 60%);transform:translateX(-100%);transition:transform 0.5s}
+        .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.35)}
+        .btn-g:hover::before{transform:translateX(100%)}
+        .btn-o{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:transparent;color:var(--gold);padding:0.95rem 2.2rem;border:1px solid rgba(201,168,76,0.4);border-radius:2px;cursor:pointer;text-decoration:none;transition:all 0.25s}
+        .btn-o:hover{background:rgba(201,168,76,0.08);border-color:var(--gold);transform:translateY(-2px)}
 
         /* SECTION */
-        .section { padding: 6rem 0; }
-        .section-inner { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
-        .s-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6rem; }
-        .s-title { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: clamp(2rem, 4vw, 3rem); text-transform: uppercase; line-height: 1; letter-spacing: 0.02em; margin-bottom: 0.8rem; }
-        .s-title span { color: var(--gold); }
-        .s-div { width: 40px; height: 2px; background: var(--gold); margin-bottom: 2.5rem; }
+        .sec{padding:7rem 0}
+        .inner{max-width:1280px;margin:0 auto;padding:0 2.5rem}
+        .stag{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
+        .stag::before{content:'';width:24px;height:1px;background:var(--gold)}
+        .stitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,4vw,3.2rem);text-transform:uppercase;line-height:1;letter-spacing:0.02em;margin-bottom:0.8rem}
+        .stitle span{color:var(--gold)}
+        .sdiv{width:40px;height:2px;background:var(--gold);margin-bottom:2.5rem}
+
+        /* HERO */
+        .hero{min-height:100vh;display:grid;grid-template-columns:55% 45%;position:relative;overflow:hidden}
+        .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,0.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,168,76,0.03) 0%,transparent 50%);z-index:0}
+        .hero-left{display:flex;flex-direction:column;justify-content:center;padding:9rem 3rem 6rem 6rem;position:relative;z-index:2}
+        .hero-badge{display:inline-flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.25);padding:0.45rem 1.1rem;margin-bottom:2rem;width:fit-content;background:rgba(201,168,76,0.04)}
+        .hero-h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(3.5rem,5.5vw,6.5rem);line-height:0.9;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:1.8rem}
+        .hero-h1 .gold{color:var(--gold);display:block}
+        .hero-h1 .outline{-webkit-text-stroke:1px rgba(255,255,255,0.3);color:transparent;display:block}
+        .hero-sub{font-size:1rem;color:var(--muted);line-height:1.8;max-width:400px;margin-bottom:2rem}
+        .hero-stars{display:flex;align-items:center;gap:0.4rem;margin-bottom:2.5rem;padding:0.8rem 1.2rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:3px;width:fit-content}
+        .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+
+        /* JEFFERSON PORTRAIT CARD */
+        .hero-right{position:relative;display:flex;align-items:center;justify-content:center;padding:7rem 3rem 5rem 0;z-index:2}
+        .jeff-portrait-wrap{position:relative;width:340px;max-width:90%;flex-shrink:0}
+        .jeff-portrait-frame{position:relative;border-radius:4px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(201,168,76,0.15)}
+        .jeff-portrait-frame::before{content:'';position:absolute;inset:0;z-index:4;background:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,transparent 30%,transparent 65%,rgba(0,0,0,0.5) 100%);pointer-events:none}
+        .jeff-portrait-img{width:100%;display:block;object-fit:cover;object-position:center top;filter:grayscale(10%) contrast(1.12) brightness(0.82) sepia(8%);transition:transform 0.8s ease,filter 0.5s}
+        .jeff-portrait-wrap:hover .jeff-portrait-img{transform:scale(1.03);filter:grayscale(0%) contrast(1.08) brightness(0.88) sepia(4%)}
+        .jeff-gold-border{position:absolute;top:-8px;left:-8px;right:8px;bottom:8px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;z-index:0;pointer-events:none}
+        .jeff-label{position:absolute;bottom:0;left:0;right:0;z-index:5;padding:1.5rem 1.2rem;pointer-events:none}
+        .jeff-label-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.1rem;letter-spacing:0.15em;text-transform:uppercase;color:#fff}
+        .jeff-label-role{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-top:0.2rem}
+        .jeff-deco-line{position:absolute;top:50%;right:-20px;width:1px;height:80px;background:linear-gradient(to bottom,transparent,var(--gold),transparent);transform:translateY(-50%)}
+        .jeff-floating-badge{position:absolute;top:20px;right:-50px;background:var(--gold);color:var(--dark);font-family:'Oswald',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.1em;padding:0.5rem 0.8rem;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 24px rgba(201,168,76,0.4)}
+        .jeff-floating-stars{position:absolute;bottom:80px;right:-60px;background:rgba(10,10,10,0.9);border:1px solid rgba(201,168,76,0.2);padding:0.6rem 0.8rem;display:flex;flex-direction:column;align-items:center;gap:2px}
+
+        /* BAND */
+        .band{background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-d));padding:1rem 0;overflow:hidden;position:relative}
+        .band-track{display:flex;gap:0;animation:marquee 25s linear infinite;white-space:nowrap}
+        @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        .band-item{font-family:'Oswald',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--dark);padding:0 2.5rem;display:inline-flex;align-items:center;gap:0.8rem;flex-shrink:0}
+        .band-dot{width:4px;height:4px;background:var(--dark);border-radius:50%;opacity:0.4}
 
         /* SOBRE */
-        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-        .about-cards { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-        .about-card { background: var(--mid); border: 1px solid rgba(201,168,76,0.12); border-left: 3px solid var(--gold); border-radius: 3px; padding: 1.4rem 1.5rem; }
-        .about-card-title { font-family: 'Oswald', sans-serif; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); margin-bottom: 0.5rem; }
-        .about-card-text { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
-        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; }
-        .stat-box { text-align: center; background: var(--mid2); border: 1px solid rgba(201,168,76,0.1); border-radius: 3px; padding: 1.5rem 1rem; }
-        .stat-num { font-family: 'Oswald', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--gold); line-height: 1; }
-        .stat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 0.3rem; }
+        .about-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+        .about-text p{font-size:1rem;color:var(--muted);line-height:1.85;margin-bottom:1.5rem}
+        .about-cards{display:flex;flex-direction:column;gap:1px}
+        .acard{background:var(--mid);border-left:2px solid var(--gold);padding:1.5rem 1.8rem;transition:background 0.2s,transform 0.2s;cursor:default}
+        .acard:hover{background:var(--mid2);transform:translateX(6px)}
+        .acard-icon{width:36px;height:36px;background:rgba(201,168,76,0.1);border-radius:2px;display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem;color:var(--gold)}
+        .acard-title{font-family:'Oswald',sans-serif;font-size:0.95rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--light);margin-bottom:0.4rem}
+        .acard-text{font-size:0.85rem;color:var(--muted);line-height:1.65}
+        .counters{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04);margin-top:2.5rem}
+        .counter-box{background:var(--dark2);padding:1.8rem 1rem;text-align:center}
+        .counter-num{font-family:'Oswald',sans-serif;font-size:2.5rem;font-weight:700;color:var(--gold);line-height:1;display:block}
+        .counter-label{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;display:block}
 
         /* SERVICES */
-        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-        .svc-card { background: var(--mid2); border: 1px solid rgba(255,255,255,0.06); border-radius: 3px; padding: 2rem 1.6rem; position: relative; overflow: hidden; transition: border-color 0.25s, transform 0.2s; cursor: default; }
-        .svc-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 0; background: var(--gold); transition: height 0.3s; border-radius: 0; }
-        .svc-card:hover { border-color: rgba(201,168,76,0.35); transform: translateY(-4px); }
-        .svc-card:hover::before { height: 100%; }
-        .svc-num { font-family: 'Oswald', sans-serif; font-size: 2.8rem; font-weight: 700; color: rgba(201,168,76,0.1); line-height: 1; margin-bottom: 0.8rem; }
-        .svc-name { font-family: 'Oswald', sans-serif; font-size: 1.05rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.6rem; color: var(--light); }
-        .svc-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.5rem; }
-        .svc-footer { display: flex; align-items: center; justify-content: space-between; }
-        .svc-price { font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 600; color: var(--gold); }
-        .svc-time { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; letter-spacing: 0.15em; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+        .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
+        .svc{background:var(--dark2);padding:2.2rem 2rem;position:relative;overflow:hidden;transition:background 0.3s,transform 0.3s;cursor:default;group:true}
+        .svc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.05) 0%,transparent 60%);opacity:0;transition:opacity 0.3s}
+        .svc:hover{background:var(--mid);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,0.4)}
+        .svc:hover::after{opacity:1}
+        .svc-icon{font-size:1.5rem;margin-bottom:0.8rem;display:block}
+        .svc-num{font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:rgba(201,168,76,0.08);line-height:1;position:absolute;top:1rem;right:1.5rem}
+        .svc-name{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--light);margin-bottom:0.7rem}
+        .svc-desc{font-size:0.83rem;color:var(--muted);line-height:1.7;margin-bottom:1.8rem}
+        .svc-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.05);padding-top:1.2rem}
+        .svc-price{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold)}
+        .svc-time{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.15em;color:var(--muted);display:flex;align-items:center;gap:4px}
 
         /* AGENDA */
-        .agenda-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.75rem; }
-        .day-card { background: var(--mid); border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; padding: 1.3rem 0.5rem; text-align: center; transition: border-color 0.2s, transform 0.15s; position: relative; }
-        .day-card:not(.closed):hover { border-color: rgba(201,168,76,0.4); transform: translateY(-3px); }
-        .day-card.closed { opacity: 0.38; }
-        .day-card.closed::after { content: 'FECHADO'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-12deg); font-family: 'Barlow Condensed', sans-serif; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em; color: #c0392b; border: 1px solid #c0392b; padding: 0.15rem 0.4rem; white-space: nowrap; }
-        .day-name { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
-        .day-hours { font-family: 'Oswald', sans-serif; font-size: 0.82rem; font-weight: 400; color: var(--light); line-height: 1.5; }
+        .agenda-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(255,255,255,0.04)}
+        .dcard{background:var(--dark2);padding:1.8rem 0.5rem;text-align:center;position:relative;transition:background 0.2s,transform 0.2s}
+        .dcard:not(.closed):hover{background:var(--mid);transform:translateY(-3px)}
+        .dcard.closed{opacity:0.35}
+        .dcard.closed::after{content:'FECHADO';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font-family:'Barlow Condensed',sans-serif;font-size:0.52rem;font-weight:700;letter-spacing:0.15em;color:var(--red);border:1px solid var(--red);padding:0.15rem 0.4rem;white-space:nowrap}
+        .dname{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem}
+        .dhours{font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--light);line-height:1.6}
+        .dhours .end{display:block;font-size:0.75rem;color:var(--muted)}
 
-        /* JEFFERSON SECTION */
-        .jeff-section { display: grid; grid-template-columns: 1fr 1fr; min-height: 680px; }
-        .jeff-photo-side { position: relative; overflow: hidden; }
-        .jeff-full-img { width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: grayscale(12%) contrast(1.12) brightness(0.8) sepia(8%); display: block; transition: transform 0.8s ease; }
-        .jeff-photo-side:hover .jeff-full-img { transform: scale(1.04); }
-        .jeff-overlay1 { position: absolute; inset: 0; background: radial-gradient(ellipse at 40% 50%, transparent 35%, rgba(0,0,0,0.55) 100%); z-index: 2; pointer-events: none; }
-        .jeff-overlay2 { position: absolute; inset: 0; background: linear-gradient(to right, transparent 50%, var(--mid) 100%); z-index: 3; pointer-events: none; }
-        .jeff-overlay3 { position: absolute; bottom: 0; left: 0; right: 0; height: 40%; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); z-index: 3; pointer-events: none; }
-        .jeff-gold-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, transparent, var(--gold) 30%, transparent); z-index: 5; pointer-events: none; }
-        .jeff-text-side { background: var(--mid); display: flex; flex-direction: column; justify-content: center; padding: 5rem 4rem; }
-        .jeff-quote { font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 300; font-style: italic; line-height: 1.55; color: var(--light); position: relative; padding-left: 1.5rem; margin-bottom: 2rem; }
-        .jeff-quote::before { content: '"'; position: absolute; left: -0.2rem; top: -0.8rem; font-size: 4rem; color: var(--gold); line-height: 1; font-family: 'Oswald', sans-serif; font-style: normal; }
-        .jeff-name { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
-        .jeff-role-txt { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-top: 0.3rem; }
-        .jeff-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.08); }
-        .jeff-spec-l { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.25rem; }
-        .jeff-spec-v { font-family: 'Oswald', sans-serif; font-size: 0.95rem; color: var(--light); }
+        /* JEFF FULL SECTION */
+        .jeff-section{display:grid;grid-template-columns:45% 55%;min-height:700px;position:relative;overflow:hidden}
+        .jeff-img-side{position:relative;overflow:hidden}
+        .jeff-full{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:grayscale(10%) contrast(1.12) brightness(0.8);transition:transform 0.8s ease,filter 0.5s}
+        .jeff-img-side:hover .jeff-full{transform:scale(1.04);filter:grayscale(0%) contrast(1.08) brightness(0.85)}
+        .jeff-ov1{position:absolute;inset:0;background:radial-gradient(ellipse at 40% 50%,transparent 30%,rgba(0,0,0,0.5) 100%);z-index:2;pointer-events:none}
+        .jeff-ov2{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,#0A0A0A 100%);z-index:3;pointer-events:none}
+        .jeff-ov3{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top,rgba(0,0,0,0.4),transparent);z-index:3;pointer-events:none}
+        .jeff-accent{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(to right,transparent,var(--gold) 25%,transparent);z-index:5;pointer-events:none}
+        .jeff-text-wrap{background:#0A0A0A;display:flex;flex-direction:column;justify-content:center;padding:5rem 4.5rem}
+        .jeff-quote-big{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:300;font-style:italic;line-height:1.5;color:var(--light);position:relative;padding-left:1.5rem;margin-bottom:2rem}
+        .jeff-quote-big::before{content:'"';position:absolute;left:-0.3rem;top:-1rem;font-size:5rem;color:var(--gold);line-height:1;font-family:'Oswald',sans-serif;font-style:normal;opacity:0.6}
+        .jeff-name-big{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold)}
+        .jeff-role-big{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem}
+        .jeff-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.06)}
+        .jspec-l{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:0.25rem}
+        .jspec-v{font-family:'Oswald',sans-serif;font-size:0.95rem;color:var(--light)}
 
         /* TESTIMONIALS */
-        .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-        .test-card { background: var(--mid2); border: 1px solid rgba(201,168,76,0.1); border-radius: 3px; padding: 2rem; position: relative; }
-        .test-card::before { content: '"'; position: absolute; top: 1rem; right: 1.5rem; font-family: 'Oswald', sans-serif; font-size: 4rem; color: rgba(201,168,76,0.1); line-height: 1; }
-        .test-avatar { width: 44px; height: 44px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 1rem; font-weight: 600; color: var(--gold); margin-bottom: 1rem; }
-        .test-stars { display: flex; gap: 3px; margin-bottom: 0.8rem; }
-        .test-text { font-size: 0.9rem; color: var(--muted); line-height: 1.7; font-style: italic; margin-bottom: 1rem; }
-        .test-name { font-family: 'Oswald', sans-serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.05em; color: var(--light); }
+        .test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
+        .tcard{background:var(--dark2);padding:2.2rem;position:relative;transition:background 0.2s,transform 0.2s}
+        .tcard:hover{background:var(--mid);transform:translateY(-3px)}
+        .tcard-quote{position:absolute;top:1rem;right:1.5rem;font-family:'Oswald',sans-serif;font-size:5rem;color:rgba(201,168,76,0.06);line-height:1;pointer-events:none}
+        .tavatar{width:46px;height:46px;border-radius:50%;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:1rem;flex-shrink:0}
+        .tstars{display:flex;gap:3px;margin-bottom:1rem}
+        .ttext{font-size:0.9rem;color:var(--muted);line-height:1.75;font-style:italic;margin-bottom:1.2rem}
+        .tname{font-family:'Oswald',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.06em;color:var(--light)}
+        .ttime{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.15em;color:var(--muted);margin-top:0.2rem}
 
         /* CONTACT */
-        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
-        .contact-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 2rem; }
-        .contact-icon { width: 42px; height: 42px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .contact-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
-        .contact-val { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
-        .contact-val a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
-        .contact-val a:hover { color: var(--gold); }
-        .sched-table { width: 100%; border-collapse: collapse; }
-        .sched-table td { padding: 0.6rem 0; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .sched-table td:first-child { color: var(--muted); }
-        .sched-table td:last-child { text-align: right; color: var(--light); font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; letter-spacing: 0.05em; }
-        .closed-txt { color: #c0392b !important; }
+        .contact-layout{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+        .citem{display:flex;align-items:flex-start;gap:1rem;margin-bottom:2rem}
+        .cicon{width:44px;height:44px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.18);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+        .citem:hover .cicon{background:rgba(201,168,76,0.15);border-color:var(--gold)}
+        .clabel{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem}
+        .cval{font-size:0.9rem;color:var(--muted);line-height:1.7}
+        .cval a{color:var(--muted);text-decoration:none;transition:color 0.2s}
+        .cval a:hover{color:var(--gold)}
+        .sched-tbl{width:100%;border-collapse:collapse}
+        .sched-tbl td{padding:0.65rem 0;font-size:0.88rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .sched-tbl td:first-child{color:var(--muted)}
+        .sched-tbl td:last-child{text-align:right;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.05em}
+        .sched-tbl .closed-row td{color:rgba(192,57,43,0.7)!important}
+        .cbox{background:var(--mid);border:1px solid rgba(201,168,76,0.12);border-radius:3px;padding:2.5rem;position:relative;overflow:hidden}
+        .cbox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--gold-d),var(--gold),var(--gold-d))}
 
         /* FOOTER */
-        .footer { background: var(--dark2); border-top: 1px solid rgba(201,168,76,0.15); padding: 4rem 0 0; }
-        .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
-        .footer-col-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; }
-        .footer-text { font-size: 0.875rem; color: var(--muted); line-height: 1.8; }
-        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.05); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: rgba(154,144,128,0.5); }
-        .footer-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(201,168,76,0.35); border: 1px solid rgba(201,168,76,0.15); padding: 0.25rem 0.75rem; }
+        .footer{background:var(--dark2);border-top:1px solid rgba(201,168,76,0.1)}
+        .footer-main{max-width:1280px;margin:0 auto;padding:4rem 2.5rem 3rem;display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:3rem}
+        .footer-col-t{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
+        .footer-txt{font-size:0.875rem;color:var(--muted);line-height:2}
+        .footer-bottom{border-top:1px solid rgba(255,255,255,0.04);padding:1.5rem 2.5rem;max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;color:rgba(154,144,128,0.45)}
+        .fbadge{font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.12);padding:0.25rem 0.8rem}
 
-        /* DIVIDER BAND */
-        .band { background: var(--gold); padding: 1.2rem 0; overflow: hidden; position: relative; }
-        .band-inner { display: flex; gap: 4rem; animation: marquee 20s linear infinite; white-space: nowrap; }
-        @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-        .band-item { font-family: 'Oswald', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dark); display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+        /* AMENITIES STRIP */
+        .amenities{background:var(--mid);border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);padding:2rem 2.5rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.5rem}
+        .amen{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color 0.2s}
+        .amen:hover{color:var(--gold)}
 
-        /* AMENITIES */
-        .amenity-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; padding: 3rem 0; border-top: 1px solid rgba(201,168,76,0.1); margin-top: 0; }
-        .amenity-item { display: flex; align-items: center; gap: 0.6rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+        /* GLOW CURSOR */
+        .glow-cursor{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease}
 
         /* RESPONSIVE */
-        @media (max-width: 1024px) {
-          .services-grid { grid-template-columns: repeat(2, 1fr); }
-          .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-          .jeff-section { grid-template-columns: 1fr; }
-          .jeff-photo-side { min-height: 420px; }
-          .jeff-overlay2 { background: linear-gradient(to top, var(--mid) 0%, transparent 60%); }
-          .test-grid { grid-template-columns: repeat(2, 1fr); }
-          .footer-grid { grid-template-columns: 1fr 1fr; }
+        @media(max-width:1024px){
+          .hero{grid-template-columns:1fr}
+          .hero-right{justify-content:flex-start;padding:2rem 2.5rem 4rem}
+          .hero-left{padding:8rem 2.5rem 2rem}
+          .jeff-portrait-wrap{width:280px}
+          .jeff-floating-badge,.jeff-floating-stars{display:none}
+          .svcs{grid-template-columns:repeat(2,1fr)}
+          .about-layout{grid-template-columns:1fr;gap:3rem}
+          .jeff-section{grid-template-columns:1fr}
+          .jeff-img-side{min-height:500px}
+          .jeff-ov2{background:linear-gradient(to top,#0A0A0A 0%,transparent 50%)}
+          .jeff-text-wrap{padding:3rem 2.5rem}
+          .test-grid{grid-template-columns:1fr 1fr}
+          .footer-main{grid-template-columns:1fr 1fr}
         }
-        @media (max-width: 768px) {
-          .hero { grid-template-columns: 1fr; min-height: auto; }
-          .hero-left { padding: 7rem 1.5rem 3rem; order: 2; }
-          .hero-right { order: 1; min-height: 60vw; max-height: 80vh; }
-          .jeff-grad-left { background: linear-gradient(to top, rgba(13,13,13,0.9) 0%, transparent 50%); }
-          .hero-h1 { font-size: clamp(2.5rem, 8vw, 4rem); }
-          .hero-badge { font-size: 0.6rem; }
-          .nav-links { display: none; }
-          .hamburger { display: block; }
-          .section { padding: 4rem 0; }
-          .section-inner { padding: 0 1.25rem; }
-          .services-grid { grid-template-columns: 1fr; }
-          .agenda-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
-          .agenda-grid > *:nth-child(5), .agenda-grid > *:nth-child(6), .agenda-grid > *:nth-child(7) { grid-column: span 1; }
-          .test-grid { grid-template-columns: 1fr; }
-          .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
-          .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
-          .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
-          .jeff-text-side { padding: 3rem 1.5rem; }
-          .stats-row { grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-          .hero-actions { flex-direction: column; }
-          .btn-g, .btn-o { justify-content: center; }
+        @media(max-width:768px){
+          .nav-links{display:none}
+          .hamburger{display:block}
+          .hero-left{padding:7rem 1.5rem 2rem}
+          .hero-right{padding:2rem 1.5rem 4rem}
+          .jeff-portrait-wrap{width:100%;max-width:320px}
+          .sec{padding:5rem 0}
+          .inner{padding:0 1.5rem}
+          .svcs{grid-template-columns:1fr}
+          .agenda-wrap{grid-template-columns:repeat(4,1fr)}
+          .test-grid{grid-template-columns:1fr}
+          .contact-layout{grid-template-columns:1fr;gap:2.5rem}
+          .footer-main{grid-template-columns:1fr;gap:2rem;padding:3rem 1.5rem 2rem}
+          .footer-bottom{flex-direction:column;gap:1rem;text-align:center;padding:1.5rem}
+          .jeff-grid{grid-template-columns:1fr}
+          .counters{grid-template-columns:repeat(3,1fr)}
+          .hero-actions{flex-direction:column;align-items:flex-start}
+          .hero-h1{font-size:clamp(2.8rem,9vw,4.5rem)}
         }
-        @media (max-width: 480px) {
-          .agenda-grid { grid-template-columns: repeat(4, 1fr); }
-          .jeff-specs { grid-template-columns: 1fr; gap: 1rem; }
-          .stats-row { grid-template-columns: 1fr; }
+        @media(max-width:480px){
+          .agenda-wrap{grid-template-columns:repeat(3,1fr)}
+          .hero-h1{font-size:clamp(2.5rem,10vw,3.5rem)}
         }
       `}</style>
 
+      {/* GLOW CURSOR */}
+      <div className="glow-cursor" style={{ left: `${mousePos.x * 100}%`, top: `${mousePos.y * 100}%` }} />
+
       {/* MOBILE MENU */}
-      <div className={`mobile-menu ${mobileOpen ? 'open' : ''}`}>
-        <button className="mobile-close" onClick={() => setMobileOpen(false)}><X size={28} /></button>
-        {navLinks.map(l => (
-          <button key={l.id} className="mobile-link" onClick={() => scrollTo(l.id)}>{l.label}</button>
-        ))}
+      <div className={`mmenu ${mobileOpen ? 'open' : ''}`}>
+        <button className="mmenu-close" onClick={() => setMobileOpen(false)}><X size={30} /></button>
+        {navLinks.map(l => <button key={l.id} className="mmenu-link" onClick={() => scrollTo(l.id)}>{l.label}</button>)}
         <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-           target="_blank" rel="noopener noreferrer" className="btn-g" onClick={() => setMobileOpen(false)}>
-          Agendar Agora
+           target="_blank" rel="noopener noreferrer" className="btn-g" style={{ fontSize: '1rem', padding: '1rem 2.5rem' }}>
+          <Calendar size={18} /> Agendar Agora
         </a>
       </div>
 
       {/* NAV */}
       <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
         <div className="nav-inner">
-          <a href="#home" className="nav-logo" onClick={e => { e.preventDefault(); scrollTo('home') }}>
+          <div className="nav-logo" onClick={() => scrollTo('home')}>
             <img src={logoImage} alt="Trend Blade" />
-            <span className="nav-logo-text">TREND <span>BLADE</span></span>
-          </a>
+            <span className="logo-text">TREND <span>BLADE</span></span>
+          </div>
           <ul className="nav-links">
             {navLinks.map(l => (
-              <li key={l.id}>
-                <button className={`nav-link ${activeSection === l.id ? 'active' : ''}`} onClick={() => scrollTo(l.id)}>
-                  {l.label}
-                </button>
-              </li>
+              <li key={l.id}><button className={`nl ${activeSection === l.id ? 'active' : ''}`} onClick={() => scrollTo(l.id)}>{l.label}</button></li>
             ))}
-            <li>
-              <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                 target="_blank" rel="noopener noreferrer" className="nav-link nav-cta bc">
-                Agendar
-              </a>
-            </li>
+            <li><a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
+                   target="_blank" rel="noopener noreferrer" className="nl nav-cta bc">Agendar</a></li>
           </ul>
-          <button className="hamburger" onClick={() => setMobileOpen(true)} aria-label="Menu">
-            <Menu size={26} />
-          </button>
+          <button className="hamburger" onClick={() => setMobileOpen(true)}><Menu size={22} /></button>
         </div>
       </nav>
 
       {/* HERO */}
-      <section id="home" className="hero" style={{ background: 'linear-gradient(135deg,#0D0D0D 0%,#151008 50%,#0D0D0D 100%)' }}>
-        <div className="hero-left" style={{ opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? 'translateY(0)' : 'translateY(24px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
+      <section id="home" className="hero">
+        <div className="hero-bg" />
+        <ParticleField />
+        <div className="hero-left" style={{ opacity: heroReady ? 1 : 0, transform: heroReady ? 'none' : 'translateY(30px)', transition: 'all 0.9s cubic-bezier(.16,1,.3,1)' }}>
           <div className="hero-badge">✦ Barbearia Premium · Guarulhos, SP</div>
           <h1 className="hero-h1">
-            Estilo &amp;<br />
-            <span className="gold">Precisão</span><br />
-            Redefinidos
+            <span style={{ display: 'block' }}>Estilo &amp;</span>
+            <span className="gold">Precisão</span>
+            <span className="outline">Redefinidos</span>
           </h1>
           <p className="hero-sub">Mais que um corte — uma experiência premium. Transformamos seu visual com técnica, estilo e o melhor atendimento de Guarulhos.</p>
           <div className="hero-stars">
-            {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="#C9A84C" color="#C9A84C" />)}
-            <span style={{ fontFamily: 'Oswald', fontSize: '1rem', color: '#C9A84C', marginLeft: 4 }}>5.0</span>
-            <span className="hero-stars-label">· 145 avaliações no Google</span>
+            {[...Array(5)].map((_,i) => <Star key={i} size={14} fill="#C9A84C" color="#C9A84C" />)}
+            <span style={{ fontFamily:'Oswald', fontSize:'1rem', color:'#C9A84C', marginLeft:4 }}>5.0</span>
+            <span style={{ fontSize:'0.82rem', color:'#9A9080' }}>· 145 avaliações no Google</span>
           </div>
           <div className="hero-actions">
             <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-               target="_blank" rel="noopener noreferrer" className="btn-g">
-              <Calendar size={16} /> Agendar Agora
-            </a>
-            <button className="btn-o" onClick={() => scrollTo('servicos')}>
-              <Scissors size={16} /> Ver Serviços
-            </button>
+               target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16} /> Agendar Agora</a>
+            <button className="btn-o" onClick={() => scrollTo('servicos')}><Scissors size={16} /> Ver Serviços</button>
           </div>
         </div>
-        <div className="hero-right" style={{ opacity: heroLoaded ? 1 : 0, transition: 'opacity 1s ease 0.3s' }}>
-          <img className="jeff-photo" src={jeffersonImage} alt="Jefferson — Fundador Trend Blade"
-               onError={e => { e.target.style.display = 'none'; e.target.parentElement.style.background = 'linear-gradient(135deg,#1a1510,#2a2015)' }} />
-          <div className="cinema-top" />
-          <div className="cinema-bot" />
-          <div className="jeff-vignette" />
-          <div className="jeff-grad-left" />
-          <div className="jeff-grad-bottom" />
-          <div className="jeff-geo" />
-          <div className="jeff-tag">
-            <div className="jeff-tag-name">Jefferson</div>
-            <div className="jeff-tag-role">Fundador & Master Barber</div>
-            <div className="jeff-tag-line" />
-          </div>
-          <div className="scroll-hint" style={{ color: 'rgba(201,168,76,0.5)' }}>
-            <ChevronDown size={18} />
+
+        <div className="hero-right" style={{ opacity: heroReady ? 1 : 0, transition: 'opacity 1.2s ease 0.4s' }}>
+          <div className="jeff-portrait-wrap">
+            <div className="jeff-gold-border" />
+            <div className="jeff-portrait-frame">
+              <img className="jeff-portrait-img" src={jeffersonImage} alt="Jefferson — Fundador Trend Blade"
+                   onError={e => { e.target.parentElement.style.background='linear-gradient(180deg,#1a1510,#2a2015)'; e.target.parentElement.style.minHeight='500px'; e.target.style.display='none' }} />
+            </div>
+            <div className="jeff-label">
+              <div className="jeff-label-name">Jefferson</div>
+              <div className="jeff-label-role">Fundador & Master Barber</div>
+            </div>
+            <div className="jeff-deco-line" />
+            <div className="jeff-floating-badge">Master Barber ✦</div>
+            <div className="jeff-floating-stars">
+              <div style={{ display:'flex', gap:2 }}>{[...Array(5)].map((_,i) => <Star key={i} size={10} fill="#C9A84C" color="#C9A84C" />)}</div>
+              <div style={{ fontFamily:'Oswald', fontSize:'0.7rem', color:'#C9A84C', marginTop:2 }}>5.0/5</div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* BAND */}
       <div className="band">
-        <div className="band-inner">
-          {[...Array(8)].map((_, i) => (
+        <div className="band-track">
+          {[...Array(10)].map((_,i) => (
             <React.Fragment key={i}>
-              <span className="band-item">✦ Corte Premium</span>
-              <span className="band-item">✦ Barba Clássica</span>
-              <span className="band-item">✦ 5.0 no Google</span>
-              <span className="band-item">✦ Guarulhos, SP</span>
+              <span className="band-item"><span className="band-dot"/>Corte Premium</span>
+              <span className="band-item"><span className="band-dot"/>Barba Clássica</span>
+              <span className="band-item"><span className="band-dot"/>5.0 Google</span>
+              <span className="band-item"><span className="band-dot"/>Guarulhos SP</span>
             </React.Fragment>
           ))}
         </div>
       </div>
 
       {/* SOBRE */}
-      <section id="sobre" className="section" style={{ background: '#111' }}>
-        <div className="section-inner">
-          <div className="about-grid">
-            <AnimatedSection>
-              <div className="s-tag">Nossa história</div>
-              <h2 className="s-title">Sobre a <span>Trend Blade</span></h2>
-              <div className="s-div" />
-              <p style={{ fontSize: '1rem', color: '#9A9080', lineHeight: 1.8, marginBottom: '2rem' }}>
-                Localizada no coração de Guarulhos, a Trend Blade Barbearia nasceu da paixão por transformar o cuidado masculino em uma experiência única. Combinamos técnicas tradicionais com tendências modernas, criando um ambiente onde estilo, conforto e qualidade se encontram.
-              </p>
-              <div className="stats-row">
-                {[{ num: '5.0', label: 'Nota Google' }, { num: '145+', label: 'Avaliações' }, { num: '10+', label: 'Anos de exp.' }].map((s, i) => (
-                  <div key={i} className="stat-box">
-                    <div className="stat-num">{s.num}</div>
-                    <div className="stat-label">{s.label}</div>
-                  </div>
-                ))}
+      <section id="sobre" className="sec" style={{ background:'#0F0F0F' }}>
+        <div className="inner">
+          <div className="about-layout">
+            <Reveal>
+              <div className="stag">Nossa história</div>
+              <h2 className="stitle">Sobre a <span>Trend Blade</span></h2>
+              <div className="sdiv" />
+              <div className="about-text">
+                <p>Localizada no coração de Guarulhos, a Trend Blade Barbearia nasceu da paixão por transformar o cuidado masculino em uma experiência única. Combinamos técnicas tradicionais com tendências modernas.</p>
+                <p>Cada cliente que entra pela nossa porta é tratado com atenção personalizada, em um ambiente aconchegante onde estilo, conforto e qualidade se encontram.</p>
               </div>
-            </AnimatedSection>
-            <AnimatedSection delay={0.15}>
+              <div className="counters">
+                <div className="counter-box"><span className="counter-num"><Counter target={5} suffix=".0" /></span><span className="counter-label">Nota Google</span></div>
+                <div className="counter-box"><span className="counter-num"><Counter target={145} suffix="+" /></span><span className="counter-label">Avaliações</span></div>
+                <div className="counter-box"><span className="counter-num"><Counter target={10} suffix="+" /></span><span className="counter-label">Anos exp.</span></div>
+              </div>
+            </Reveal>
+            <Reveal delay={0.15}>
               <div className="about-cards">
                 {[
-                  { title: 'Experiência Premium', text: 'Cada cliente recebe atenção personalizada em um ambiente sofisticado e aconchegante.' },
-                  { title: 'Técnica Apurada', text: 'Profissionais dedicados sempre atualizados com as últimas tendências e técnicas.' },
-                  { title: 'Comodidade Total', text: 'Wi-Fi gratuito, cartão de crédito e atendimento personalizado para sua conveniência.' },
-                ].map((c, i) => (
-                  <div key={i} className="about-card">
-                    <div className="about-card-title">{c.title}</div>
-                    <div className="about-card-text">{c.text}</div>
+                  { icon: Award, title: 'Experiência Premium', text: 'Cada cliente recebe atenção personalizada em um ambiente sofisticado e aconchegante.' },
+                  { icon: Scissors, title: 'Técnica Apurada', text: 'Profissionais sempre atualizados com as últimas tendências e técnicas de barbearia.' },
+                  { icon: Heart, title: 'Ambiente Familiar', text: 'Um espaço acolhedor onde você se sente em casa — tranquilo, confortável e exclusivo.' },
+                  { icon: Users, title: 'Atendimento Dedicado', text: 'Cada visita é única. Conhecemos você, seu estilo e suas preferências pessoais.' },
+                ].map((c,i) => (
+                  <div key={i} className="acard">
+                    <div className="acard-icon"><c.icon size={18} /></div>
+                    <div className="acard-title">{c.title}</div>
+                    <div className="acard-text">{c.text}</div>
                   </div>
                 ))}
               </div>
-            </AnimatedSection>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* SERVIÇOS */}
-      <section id="servicos" className="section" style={{ background: '#0D0D0D' }}>
-        <div className="section-inner">
-          <AnimatedSection>
-            <div className="s-tag">O que oferecemos</div>
-            <h2 className="s-title">Nossos <span>Serviços</span></h2>
-            <div className="s-div" />
-          </AnimatedSection>
-          <div className="services-grid">
-            {services.map((s, i) => (
-              <AnimatedSection key={i} delay={i * 0.08}>
-                <div className="svc-card">
+      <section id="servicos" className="sec" style={{ background:'#0A0A0A' }}>
+        <div className="inner">
+          <Reveal><div className="stag">O que oferecemos</div><h2 className="stitle">Nossos <span>Serviços</span></h2><div className="sdiv" /></Reveal>
+          <div className="svcs">
+            {services.map((s,i) => (
+              <Reveal key={i} delay={i*0.07}>
+                <div className="svc">
                   <div className="svc-num">{s.num}</div>
+                  <span className="svc-icon">{s.icon}</span>
                   <div className="svc-name">{s.name}</div>
                   <div className="svc-desc">{s.desc}</div>
                   <div className="svc-footer">
                     <div className="svc-price">{s.price}</div>
-                    <div className="svc-time"><Clock size={12} />{s.time}</div>
+                    <div className="svc-time"><Clock size={11}/>{s.time}</div>
                   </div>
                 </div>
-              </AnimatedSection>
+              </Reveal>
             ))}
           </div>
-          <AnimatedSection delay={0.3}>
-            <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.8rem' }}>
-              <p style={{ color: '#9A9080', fontSize: '0.85rem' }}>Agende seu horário pelo Booksy ou WhatsApp</p>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                   target="_blank" rel="noopener noreferrer" className="btn-g">
-                  <Calendar size={16} /> Agendar pelo Booksy
-                </a>
-                <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o">
-                  <Phone size={16} /> WhatsApp
-                </a>
-              </div>
+          <Reveal delay={0.3}>
+            <div style={{ marginTop:'3rem', display:'flex', gap:'1rem', flexWrap:'wrap', alignItems:'center' }}>
+              <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
+                 target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16}/> Agendar pelo Booksy</a>
+              <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o"><Phone size={16}/> WhatsApp</a>
             </div>
-          </AnimatedSection>
+          </Reveal>
         </div>
       </section>
 
       {/* AGENDA */}
-      <section id="agenda" className="section" style={{ background: '#111' }}>
-        <div className="section-inner">
-          <AnimatedSection>
-            <div className="s-tag">Funcionamento</div>
-            <h2 className="s-title">Horários de <span>Atendimento</span></h2>
-            <div className="s-div" />
-            <div className="agenda-grid">
-              {schedule.map((d, i) => (
-                <div key={i} className={`day-card ${d.closed ? 'closed' : ''}`}>
-                  <div className="day-name">{d.day}</div>
-                  {!d.closed && (
-                    <div className="day-hours">{d.hours?.replace('–', '\n').split('\n').map((h, j) => <span key={j} style={{ display: 'block' }}>{h}</span>)}</div>
-                  )}
-                  {d.closed && <div className="day-hours" style={{ color: '#9A9080' }}>—</div>}
+      <section id="agenda" className="sec" style={{ background:'#0F0F0F' }}>
+        <div className="inner">
+          <Reveal><div className="stag">Funcionamento</div><h2 className="stitle">Horários de <span>Atendimento</span></h2><div className="sdiv" /></Reveal>
+          <Reveal delay={0.1}>
+            <div className="agenda-wrap">
+              {schedule.map((d,i) => (
+                <div key={i} className={`dcard ${d.closed?'closed':''}`}>
+                  <div className="dname">{d.day}</div>
+                  {!d.closed ? <div className="dhours">{d.hours}<span className="end">{d.end}</span></div>
+                    : <div className="dhours" style={{color:'#9A9080'}}>—</div>}
                 </div>
               ))}
             </div>
-            <p style={{ marginTop: '1.5rem', fontSize: '0.78rem', color: '#9A9080', letterSpacing: '0.04em' }}>
+            <p style={{ marginTop:'1.5rem', fontSize:'0.78rem', color:'#9A9080', letterSpacing:'0.04em' }}>
               * Domingo e Segunda-feira: fechado. Agendamentos via Booksy ou WhatsApp.
             </p>
-          </AnimatedSection>
+          </Reveal>
         </div>
       </section>
 
-      {/* JEFFERSON */}
-      <section className="jeff-section">
-        <div className="jeff-photo-side">
-          <img className="jeff-full-img" src={jeffersonImage} alt="Jefferson — Master Barber"
+      {/* JEFFERSON SECTION */}
+      <div className="jeff-section">
+        <div className="jeff-img-side">
+          <img className="jeff-full" src={jeffersonImage} alt="Jefferson — Master Barber"
                onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#1a1510,#2a2015)'; e.target.parentElement.style.minHeight='500px' }} />
-          <div className="jeff-overlay1" />
-          <div className="jeff-overlay2" />
-          <div className="jeff-overlay3" />
-          <div className="jeff-gold-bar" />
+          <div className="jeff-ov1"/><div className="jeff-ov2"/><div className="jeff-ov3"/><div className="jeff-accent"/>
         </div>
-        <div className="jeff-text-side">
-          <AnimatedSection>
-            <div className="s-tag">O profissional por trás da arte</div>
-            <div className="jeff-quote">
-              Barbearia não é só corte de cabelo. É o lugar onde o homem cuida de si mesmo, com orgulho.
-            </div>
-            <div className="jeff-name">Jefferson</div>
-            <div className="jeff-role-txt">Fundador & Master Barber — Trend Blade Barbearia</div>
-            <div className="jeff-specs">
-              {[
-                { l: 'Especialidade', v: 'Cortes Degradê & Barba' },
-                { l: 'Localização', v: 'Guarulhos, SP' },
-                { l: 'Agendamento', v: 'Booksy & WhatsApp' },
-                { l: 'Atendimento', v: 'Terça → Sábado' },
-              ].map((s, i) => (
-                <div key={i}>
-                  <div className="jeff-spec-l">{s.l}</div>
-                  <div className="jeff-spec-v">{s.v}</div>
-                </div>
+        <div className="jeff-text-wrap">
+          <Reveal dir="right">
+            <div className="stag">O mestre por trás da arte</div>
+            <div className="jeff-quote-big">Barbearia não é só corte de cabelo. É o lugar onde o homem cuida de si mesmo, com orgulho e confiança.</div>
+            <div className="jeff-name-big">Jefferson</div>
+            <div className="jeff-role-big">Fundador & Master Barber — Trend Blade Barbearia</div>
+            <div className="jeff-grid">
+              {[{l:'Especialidade',v:'Cortes Degradê & Barba'},{l:'Localização',v:'Guarulhos, SP'},{l:'Agendamento',v:'Booksy & WhatsApp'},{l:'Atendimento',v:'Terça → Sábado'}].map((s,i) => (
+                <div key={i}><div className="jspec-l">{s.l}</div><div className="jspec-v">{s.v}</div></div>
               ))}
             </div>
-            <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ marginTop:'2.5rem', display:'flex', gap:'1rem', flexWrap:'wrap' }}>
               <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                 target="_blank" rel="noopener noreferrer" className="btn-g" style={{ fontSize: '0.8rem' }}>
-                <Calendar size={14} /> Agendar
-              </a>
-              <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer"
-                 className="btn-o" style={{ fontSize: '0.8rem' }}>
-                <Phone size={14} /> WhatsApp
-              </a>
+                 target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'0.82rem'}}><Calendar size={14}/> Agendar</a>
+              <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{fontSize:'0.82rem'}}><Phone size={14}/> WhatsApp</a>
             </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* AMENIDADES */}
-      <div style={{ background: '#0D0D0D', padding: '0 2rem' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div className="amenity-row">
-            {[{ icon: Wifi, t: 'Wi-Fi Gratuito' }, { icon: CreditCard, t: 'Cartão de Crédito' }, { icon: Scissors, t: 'Profissionais Especializados' }, { icon: Star, t: '5.0 no Google' }].map((a, i) => (
-              <div key={i} className="amenity-item">
-                <a.icon size={16} color="#C9A84C" /> {a.t}
-              </div>
-            ))}
-          </div>
+          </Reveal>
         </div>
       </div>
 
+      {/* AMENIDADES */}
+      <div className="amenities">
+        {[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i) => (
+          <div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>
+        ))}
+      </div>
+
       {/* DEPOIMENTOS */}
-      <section id="depoimentos" className="section" style={{ background: '#111' }}>
-        <div className="section-inner">
-          <AnimatedSection>
-            <div className="s-tag">Clientes satisfeitos</div>
-            <h2 className="s-title">O que nossos <span>clientes</span> dizem</h2>
-            <div className="s-div" />
-          </AnimatedSection>
+      <section id="depoimentos" className="sec" style={{ background:'#0F0F0F' }}>
+        <div className="inner">
+          <Reveal><div className="stag">Clientes satisfeitos</div><h2 className="stitle">O que nossos <span>clientes</span> dizem</h2><div className="sdiv"/></Reveal>
           <div className="test-grid">
-            {testimonials.map((t, i) => (
-              <AnimatedSection key={i} delay={i * 0.1}>
-                <div className="test-card">
-                  <div className="test-avatar">{t.initial}</div>
-                  <div className="test-stars">{[...Array(t.rating)].map((_, j) => <Star key={j} size={13} fill="#C9A84C" color="#C9A84C" />)}</div>
-                  <div className="test-text">"{t.text}"</div>
-                  <div className="test-name">{t.name}</div>
+            {testimonials.map((t,i) => (
+              <Reveal key={i} delay={i*0.1}>
+                <div className="tcard">
+                  <div className="tcard-quote">"</div>
+                  <div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}>
+                    <div className="tavatar">{t.initial}</div>
+                    <div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div>
+                  </div>
+                  <div className="tstars">{[...Array(t.rating)].map((_,j) => <Star key={j} size={12} fill="#C9A84C" color="#C9A84C"/>)}</div>
+                  <div className="ttext">"{t.text}"</div>
                 </div>
-              </AnimatedSection>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* CONTATO */}
-      <section id="contato" className="section" style={{ background: '#0D0D0D' }}>
-        <div className="section-inner">
-          <AnimatedSection>
-            <div className="s-tag">Fale conosco</div>
-            <h2 className="s-title">Entre em <span>Contato</span></h2>
-            <div className="s-div" />
-          </AnimatedSection>
-          <div className="contact-grid">
-            <AnimatedSection>
+      <section id="contato" className="sec" style={{ background:'#0A0A0A' }}>
+        <div className="inner">
+          <Reveal><div className="stag">Fale conosco</div><h2 className="stitle">Entre em <span>Contato</span></h2><div className="sdiv"/></Reveal>
+          <div className="contact-layout">
+            <Reveal>
               {[
-                { icon: MapPin, label: 'Endereço', val: 'Av Papa Pio XII, nº 218\nGuarulhos, São Paulo' },
-                { icon: Phone, label: 'WhatsApp', val: '(11) 95123-1443', href: 'https://wa.me/5511951231443' },
-                { icon: Instagram, label: 'Instagram', val: '@trendbladebarbearia', href: 'https://instagram.com/trendbladebarbearia' },
-              ].map((c, i) => (
-                <div key={i} className="contact-item">
-                  <div className="contact-icon"><c.icon size={18} color="#C9A84C" /></div>
+                {icon:MapPin,label:'Endereço',val:'Av Papa Pio XII, nº 218\nGuarulhos, São Paulo'},
+                {icon:Phone,label:'WhatsApp',val:'(11) 95123-1443',href:'https://wa.me/5511951231443'},
+                {icon:Instagram,label:'Instagram',val:'@trendbladebarbearia',href:'https://instagram.com/trendbladebarbearia'},
+              ].map((c,i) => (
+                <div key={i} className="citem">
+                  <div className="cicon"><c.icon size={18} color="#C9A84C"/></div>
                   <div>
-                    <div className="contact-label">{c.label}</div>
-                    {c.href
-                      ? <div className="contact-val"><a href={c.href} target="_blank" rel="noopener noreferrer">{c.val}</a></div>
-                      : <div className="contact-val" style={{ whiteSpace: 'pre-line' }}>{c.val}</div>}
+                    <div className="clabel">{c.label}</div>
+                    {c.href ? <div className="cval"><a href={c.href} target="_blank" rel="noopener noreferrer">{c.val}</a></div>
+                      : <div className="cval" style={{whiteSpace:'pre-line'}}>{c.val}</div>}
                   </div>
                 </div>
               ))}
-              <div className="contact-item">
-                <div className="contact-icon"><Clock size={18} color="#C9A84C" /></div>
-                <div style={{ flex: 1 }}>
-                  <div className="contact-label">Horários</div>
-                  <table className="sched-table">
+              <div className="citem">
+                <div className="cicon"><Clock size={18} color="#C9A84C"/></div>
+                <div style={{flex:1}}>
+                  <div className="clabel">Horários</div>
+                  <table className="sched-tbl">
                     <tbody>
-                      <tr><td>Domingo</td><td className="closed-txt">Fechado</td></tr>
-                      <tr><td>Segunda</td><td className="closed-txt">Fechado</td></tr>
+                      <tr className="closed-row"><td>Domingo</td><td>Fechado</td></tr>
+                      <tr className="closed-row"><td>Segunda</td><td>Fechado</td></tr>
                       <tr><td>Terça a Sexta</td><td>09h às 19h</td></tr>
                       <tr><td>Sábado</td><td>08h às 17h</td></tr>
                     </tbody>
                   </table>
                 </div>
               </div>
-            </AnimatedSection>
-            <AnimatedSection delay={0.15}>
-              <div style={{ background: '#1A1A1A', border: '1px solid rgba(201,168,76,0.15)', borderRadius: 4, padding: '2.5rem' }}>
-                <div style={{ fontFamily: 'Oswald', fontSize: '1.1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#C9A84C', marginBottom: '1.5rem' }}>
-                  Agende seu Horário
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '2rem' }}>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <div className="cbox">
+                <div style={{fontFamily:'Oswald',fontSize:'1.1rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',color:'#C9A84C',marginBottom:'1.5rem'}}>Agende seu Horário</div>
+                <div style={{display:'flex',flexDirection:'column',gap:'0.8rem',marginBottom:'2rem'}}>
                   <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                     target="_blank" rel="noopener noreferrer" className="btn-g" style={{ justifyContent: 'center' }}>
-                    <Calendar size={16} /> Agendar pelo Booksy
-                  </a>
-                  <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer"
-                     className="btn-o" style={{ justifyContent: 'center' }}>
-                    <Phone size={16} /> WhatsApp
-                  </a>
+                     target="_blank" rel="noopener noreferrer" className="btn-g" style={{justifyContent:'center'}}><Calendar size={16}/> Agendar pelo Booksy</a>
+                  <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{justifyContent:'center'}}><Phone size={16}/> WhatsApp</a>
                 </div>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.5rem' }}>
-                  <div style={{ fontFamily: 'Barlow Condensed', fontSize: '0.68rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '1rem' }}>
-                    Por que nos escolher
-                  </div>
-                  {['Profissionais especializados e dedicados', 'Ambiente aconchegante e sofisticado', 'Técnicas modernas e tradicionais', 'Atendimento personalizado', 'Localização privilegiada em Guarulhos'].map((item, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.6rem', fontSize: '0.875rem', color: '#9A9080' }}>
-                      <span style={{ color: '#C9A84C', fontSize: '0.6rem' }}>✦</span> {item}
+                <div style={{borderTop:'1px solid rgba(255,255,255,0.06)',paddingTop:'1.5rem'}}>
+                  <div style={{fontFamily:'Barlow Condensed',fontSize:'0.65rem',letterSpacing:'0.25em',textTransform:'uppercase',color:'#C9A84C',marginBottom:'1rem'}}>Por que nos escolher</div>
+                  {['Profissionais especializados e dedicados','Ambiente familiar e aconchegante','Técnicas modernas e tradicionais','Atendimento personalizado','Localização privilegiada em Guarulhos'].map((item,i) => (
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:'0.6rem',fontSize:'0.875rem',color:'#9A9080'}}>
+                      <span style={{color:'#C9A84C',fontSize:'0.6rem'}}>✦</span>{item}
                     </div>
                   ))}
                 </div>
               </div>
-            </AnimatedSection>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
       <footer className="footer">
-        <div className="section-inner">
-          <div className="footer-grid">
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
-                <img src={logoImage} alt="Trend Blade" style={{ height: 36, width: 'auto' }} />
-                <span style={{ fontFamily: 'Oswald', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '0.1em', color: '#C9A84C' }}>
-                  TREND <span style={{ color: '#F5F0E8' }}>BLADE</span>
-                </span>
-              </div>
-              <p className="footer-text">Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento diferenciado.</p>
+        <div className="footer-main">
+          <div>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:'1rem'}}>
+              <img src={logoImage} alt="Trend Blade" style={{height:36,width:'auto'}}/>
+              <span style={{fontFamily:'Oswald',fontWeight:700,fontSize:'1.2rem',letterSpacing:'0.1em',color:'#C9A84C'}}>TREND <span style={{color:'#F5F0E8'}}>BLADE</span></span>
             </div>
-            <div>
-              <div className="footer-col-title">Contato</div>
-              <div className="footer-text" style={{ lineHeight: 2.2 }}>
-                <div>(11) 95123-1443</div>
-                <div>@trendbladebarbearia</div>
-                <div>Av Papa Pio XII, nº 218</div>
-                <div>Guarulhos, SP</div>
-              </div>
-            </div>
-            <div>
-              <div className="footer-col-title">Horários</div>
-              <div className="footer-text" style={{ lineHeight: 2.2 }}>
-                <span style={{ color: 'rgba(192,57,43,0.8)' }}>Dom & Seg — Fechado</span><br />
-                Ter a Sex — 09h às 19h<br />
-                Sáb — 08h às 17h
-              </div>
+            <p className="footer-txt">Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento familiar diferenciado.</p>
+          </div>
+          <div>
+            <div className="footer-col-t">Contato</div>
+            <div className="footer-txt">(11) 95123-1443<br/>@trendbladebarbearia<br/>Av Papa Pio XII, nº 218<br/>Guarulhos, SP</div>
+          </div>
+          <div>
+            <div className="footer-col-t">Horários</div>
+            <div className="footer-txt">
+              <span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>
+              Ter a Sex — 09h às 19h<br/>Sáb — 08h às 17h
             </div>
           </div>
         </div>
-        <div className="footer-bottom">
-          <span>© 2025 Trend Blade Barbearia. Estilo e sofisticação em Guarulhos.</span>
-          <div className="footer-badge">Homologação</div>
+        <div style={{maxWidth:1280,margin:'0 auto'}}>
+          <div className="footer-bottom">
+            <span>© 2025 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span>
+            <div className="fbadge">Homologação</div>
+          </div>
         </div>
       </footer>
     </div>
