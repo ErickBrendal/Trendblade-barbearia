@@ -136,13 +136,13 @@ export default function App() {
 
         /* HERO PHOTO */
         .hero-right { position: relative; overflow: hidden; }
-        .jeff-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 15%; filter: grayscale(15%) contrast(1.1) brightness(0.78) sepia(10%); transition: transform 0.8s ease, filter 0.5s ease; display: block; }
+        .jeff-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: grayscale(15%) contrast(1.1) brightness(0.78) sepia(10%); transition: transform 0.8s ease, filter 0.5s ease; display: block; }
         .hero-right:hover .jeff-photo { transform: scale(1.04); filter: grayscale(5%) contrast(1.08) brightness(0.85) sepia(5%); }
         .jeff-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 40%, transparent 30%, rgba(0,0,0,0.6) 100%); z-index: 2; pointer-events: none; }
         .jeff-grad-left { position: absolute; inset: 0; background: linear-gradient(to right, rgba(13,13,13,0.85) 0%, rgba(13,13,13,0.2) 25%, transparent 50%); z-index: 3; pointer-events: none; }
         .jeff-grad-bottom { position: absolute; inset: 0; background: linear-gradient(to top, rgba(13,13,13,0.7) 0%, transparent 40%); z-index: 3; pointer-events: none; }
-        .cinema-top { position: absolute; top: 0; left: 0; right: 0; height: 48px; background: var(--dark); z-index: 5; pointer-events: none; }
-        .cinema-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 48px; background: var(--dark); z-index: 5; pointer-events: none; }
+        .cinema-top { display: none; }
+        .cinema-bot { display: none; }
         .jeff-geo { position: absolute; top: 50%; left: 2rem; transform: translateY(-50%); width: 2px; height: 90px; background: linear-gradient(to bottom, transparent, var(--gold), transparent); z-index: 6; pointer-events: none; }
         .jeff-tag { position: absolute; bottom: 80px; right: 2rem; z-index: 10; text-align: right; pointer-events: none; }
         .jeff-tag-name { font-family: 'Oswald', sans-serif; font-weight: 300; font-size: 0.95rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); }
@@ -201,7 +201,7 @@ export default function App() {
         /* JEFFERSON SECTION */
         .jeff-section { display: grid; grid-template-columns: 1fr 1fr; min-height: 680px; }
         .jeff-photo-side { position: relative; overflow: hidden; }
-        .jeff-full-img { width: 100%; height: 100%; object-fit: cover; object-position: center 10%; filter: grayscale(12%) contrast(1.12) brightness(0.8) sepia(8%); display: block; transition: transform 0.8s ease; }
+        .jeff-full-img { width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: grayscale(12%) contrast(1.12) brightness(0.8) sepia(8%); display: block; transition: transform 0.8s ease; }
         .jeff-photo-side:hover .jeff-full-img { transform: scale(1.04); }
         .jeff-overlay1 { position: absolute; inset: 0; background: radial-gradient(ellipse at 40% 50%, transparent 35%, rgba(0,0,0,0.55) 100%); z-index: 2; pointer-events: none; }
         .jeff-overlay2 { position: absolute; inset: 0; background: linear-gradient(to right, transparent 50%, var(--mid) 100%); z-index: 3; pointer-events: none; }
@@ -270,7 +270,7 @@ export default function App() {
         @media (max-width: 768px) {
           .hero { grid-template-columns: 1fr; min-height: auto; }
           .hero-left { padding: 7rem 1.5rem 3rem; order: 2; }
-          .hero-right { order: 1; min-height: 60vw; max-height: 70vh; }
+          .hero-right { order: 1; min-height: 60vw; max-height: 80vh; }
           .jeff-grad-left { background: linear-gradient(to top, rgba(13,13,13,0.9) 0%, transparent 50%); }
           .hero-h1 { font-size: clamp(2.5rem, 8vw, 4rem); }
           .hero-badge { font-size: 0.6rem; }
