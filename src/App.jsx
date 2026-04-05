@@ -118,12 +118,12 @@ export default function App() {
   const scrollTo = (id) => { setMobileOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
 
   const services = [
-    { num: '01', name: 'Corte Clássico', desc: 'Tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
-    { num: '02', name: 'Barba Completa', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
-    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
-    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
-    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '45min', icon: '✨' },
-    { num: '06', name: 'Pacote Completo', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h30', icon: '👑' },
+    { num: '01', name: 'Corte / Jeferson', desc: 'Corte com tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
+    { num: '02', name: 'Barba / Jeferson', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
+    { num: '03', name: 'Corte + Barba / Jeferson', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
+    { num: '04', name: 'Corte + Sobrancelha / Jeferson', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
+    { num: '05', name: 'Corte + Hidratação / Jeferson', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '30min', icon: '✨' },
+    { num: '06', name: 'Corte + Barba + Sobrancelha / Jeferson', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h', icon: '👑' },
   ]
 
   const schedule = [
@@ -137,9 +137,9 @@ export default function App() {
   ]
 
   const testimonials = [
-    { name: 'Carlos Silva', rating: 5, text: 'Atendimento impecável! O melhor corte que já fiz em Guarulhos. Me sinto renovado a cada visita.', initial: 'C', time: 'há 2 dias' },
-    { name: 'Roberto Santos', rating: 5, text: 'Ambiente aconchegante, profissional extremamente dedicado. Já indiquei para toda a minha família!', initial: 'R', time: 'há 1 semana' },
-    { name: 'André Costa', rating: 5, text: 'Caprichoso e atencioso em cada detalhe. Sempre saio satisfeito e com o visual perfeito.', initial: 'A', time: 'há 2 semanas' },
+    { name: 'Angel Isaid', rating: 5, text: 'Faz 10 anos não cortaba com outro barbeiro e hj conheci o Jeferson, me deixou super a vontade passou muita confiança no trabalho dele, humildade demais!', initial: 'A', time: 'há 1 semana', response: 'Fala irmão! Muito obrigado pelo feedback, de verdade! Fico feliz demais que tenha curtido o resultado. Aqui a gente faz tudo com atenção e capricho pra entregar sempre o melhor. Quando quiser, só colar de novo que será um prazer te atender!' },
+    { name: 'Francisco', rating: 5, text: 'Profissional de altíssima qualidade serviço feito com perfeição!', initial: 'F', time: 'há 2 meses' },
+    { name: 'Erik', rating: 5, text: 'Top demais', initial: 'E', time: 'há 5 dias' },
   ]
 
   const navLinks = [
@@ -361,9 +361,9 @@ export default function App() {
           <div className="jeff-portrait-wrap">
             <div className="jeff-glow"></div>
             <div className="jeff-circle">
-              <img src={jeffersonImage} alt="Jefferson — Fundador Trend Blade" onError={e=>{e.target.parentElement.style.background='linear-gradient(180deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px';e.target.style.display='none'}}/>
+              <img src={jeffersonImage} alt="Jeferson Gomes — Fundador Trend Blade" onError={e=>{e.target.parentElement.style.background='linear-gradient(180deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px';e.target.style.display='none'}}/>
             </div>
-            <div className="jeff-label"><div className="jeff-label-name">Jefferson</div><div className="jeff-label-role">Fundador & Master Barber</div></div>
+            <div className="jeff-label"><div className="jeff-label-name">Jeferson Gomes</div><div className="jeff-label-role">Fundador & Master Barber</div></div>
           </div>
         </div>
       </section>
@@ -413,14 +413,14 @@ export default function App() {
 
       <div className="jeff-section">
         <div className="jeff-img-side">
-          <img className="jeff-full" src={jeffersonImage} alt="Jefferson — Master Barber" onError={e=>{e.target.style.display='none';e.target.parentElement.style.background='linear-gradient(135deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px'}}/>
+          <img className="jeff-full" src={jeffersonImage} alt="Jeferson Gomes — Master Barber" onError={e=>{e.target.style.display='none';e.target.parentElement.style.background='linear-gradient(135deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px'}}/>
           <div className="jeff-ov1"/><div className="jeff-ov2"/><div className="jeff-ov3"/><div className="jeff-accent"/>
         </div>
         <div className="jeff-text-wrap">
           <Reveal dir="right">
             <div className="stag">O mestre por trás da arte</div>
             <div className="jeff-quote-big">Barbearia não é só corte de cabelo. É o lugar onde o homem cuida de si mesmo, com orgulho e confiança.</div>
-            <div className="jeff-name-big">Jefferson</div><div className="jeff-role-big">Fundador & Master Barber — Trend Blade Barbearia</div>
+            <div className="jeff-name-big">Jeferson Gomes</div><div className="jeff-role-big">Fundador & Master Barber — Trend Blade Barbearia</div>
             <div className="jeff-grid">{[{l:'Especialidade',v:'Cortes Degradê & Barba'},{l:'Localização',v:'Guarulhos, SP'},{l:'Agendamento',v:'Booksy & WhatsApp'},{l:'Atendimento',v:'Terça → Sábado'}].map((s,i)=><div key={i}><div className="jspec-l">{s.l}</div><div className="jspec-v">{s.v}</div></div>)}</div>
             <div style={{marginTop:'2.5rem',display:'flex',gap:'1rem',flexWrap:'wrap'}}><a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'0.82rem'}}><Calendar size={14}/> Agendar</a><a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{fontSize:'0.82rem'}}><Phone size={14}/> WhatsApp</a></div>
           </Reveal>
@@ -432,7 +432,7 @@ export default function App() {
       <section id="depoimentos" className="sec" style={{background:'#0F0F0F'}}>
         <div className="inner">
           <Reveal><div className="stag">Clientes satisfeitos</div><h2 className="stitle">O que nossos <span>clientes</span> dizem</h2><div className="sdiv"/></Reveal>
-          <div className="test-grid">{testimonials.map((t,i)=><Reveal key={i} delay={i*0.1}><div className="tcard"><div className="tcard-quote">"</div><div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}><div className="tavatar">{t.initial}</div><div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div></div><div className="tstars">{[...Array(t.rating)].map((_,j)=><Star key={j} size={12} fill="#C9A84C" color="#C9A84C"/>)}</div><div className="ttext">"{t.text}"</div></div></Reveal>)}</div>
+          <div className="test-grid">{testimonials.map((t,i)=><Reveal key={i} delay={i*0.1}><div className="tcard"><div className="tcard-quote">"</div><div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}><div className="tavatar">{t.initial}</div><div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div></div><div className="tstars">{[...Array(t.rating)].map((_,j)=><Star key={j} size={12} fill="#C9A84C" color="#C9A84C"/>)}</div><div className="ttext">"{t.text}"</div>{t.response && <div style={{marginTop:'1.2rem',paddingTop:'1rem',borderTop:'1px solid rgba(255,255,255,0.1)',fontSize:'0.8rem',color:'var(--gold)',fontStyle:'italic'}}>Resposta: {t.response}</div>}</div></Reveal>)}</div>
         </div>
       </section>
 
