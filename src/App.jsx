@@ -179,7 +179,7 @@ export default function App() {
         .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.35)}
         .btn-o{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:transparent;color:var(--gold);padding:0.7rem 1.8rem;border:1px solid var(--gold);border-radius:2px;cursor:pointer;transition:all 0.3s}
         .btn-o:hover{background:var(--gold);color:var(--dark);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.25)}
-        .hero{position:relative;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:120px 2.5rem 4rem;overflow:hidden}
+        .hero{position:relative;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center;padding:120px 2.5rem 4rem;overflow:hidden}
         .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.08) 0%, transparent 50%);pointer-events:none;z-index:2}
         .hero-left{display:flex;flex-direction:column;gap:1.5rem;position:relative;z-index:3}
         .hero-badge{display:inline-flex;align-items:center;gap:0.75rem;font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.6rem 1.2rem;border-radius:20px;width:fit-content;background:rgba(201,168,76,0.05)}
