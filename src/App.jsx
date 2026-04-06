@@ -428,7 +428,7 @@ export default function App() {
         </div>
       </div>
 
-      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Wind,t:'Climatizado'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>)}</div>
+      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Wind,t:'Ambiente Climatizado'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>)}</div>
 
       <section id="depoimentos" className="sec" style={{background:'#0F0F0F'}}>
         <div className="inner">
