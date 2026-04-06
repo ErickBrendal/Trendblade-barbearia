@@ -179,9 +179,9 @@ export default function App() {
         .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.35)}
         .btn-o{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:transparent;color:var(--gold);padding:0.7rem 1.8rem;border:1px solid var(--gold);border-radius:2px;cursor:pointer;transition:all 0.3s}
         .btn-o:hover{background:var(--gold);color:var(--dark);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.25)}
-        .hero{position:relative;min-height:100vh;display:grid;grid-template-columns:1.2fr 1fr;gap:0;align-items:center;padding:120px 2.5rem 4rem;overflow:hidden}
+        .hero{position:relative;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;justify-items:center;padding:120px 2.5rem 4rem;overflow:hidden}
         .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.08) 0%, transparent 50%);pointer-events:none;z-index:2}
-        .hero-left{display:flex;flex-direction:column;gap:1.5rem;position:relative;z-index:3;padding-right:2rem}
+        .hero-left{display:flex;flex-direction:column;gap:1.5rem;position:relative;z-index:3;justify-self:end;padding-right:3rem}
         .hero-badge{display:inline-flex;align-items:center;gap:0.75rem;font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.6rem 1.2rem;border-radius:20px;width:fit-content;background:rgba(201,168,76,0.05)}
         .hero-h1{font-family:'Oswald',sans-serif;font-size:3.5rem;font-weight:700;line-height:1.1;letter-spacing:-0.02em;color:var(--light)}
         .hero-h1 .gold{color:var(--gold)}
@@ -189,7 +189,7 @@ export default function App() {
         .hero-sub{font-size:1.05rem;line-height:1.7;color:var(--muted);max-width:450px}
         .hero-stars{display:flex;align-items:center;gap:0.8rem;font-size:0.95rem;color:var(--muted)}
         .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
-        .hero-right{position:relative;display:flex;align-items:center;justify-content:flex-start;height:550px;z-index:3;margin-left:-3rem}
+        .hero-right{position:relative;display:flex;align-items:center;justify-content:center;height:550px;z-index:3;justify-self:start}
         .jeff-portrait-wrap{position:relative;width:320px;height:420px}
         .jeff-circle{position:relative;width:100%;height:100%;border-radius:50% 50% 45% 45%;overflow:hidden;background:linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%);border:2px solid rgba(201,168,76,0.3);box-shadow:0 0 60px rgba(201,168,76,0.2), inset 0 0 40px rgba(201,168,76,0.1);animation:float 6s ease-in-out infinite}
         .jeff-circle img{width:100%;height:100%;object-fit:cover;object-position:center}
