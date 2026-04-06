@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors, ChevronDown, Menu, X, Award, Users, Heart } from 'lucide-react'
+import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors, ChevronDown, Menu, X, Award, Users, Heart, Wind } from 'lucide-react'
 import logoImage from './assets/IMG_7057.jpg'
 import jeffersonImage from './assets/jefferson.jpg'
 import './App.css'
@@ -428,7 +428,7 @@ export default function App() {
         </div>
       </div>
 
-      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>)}</div>
+      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Wind,t:'Climatizado'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>)}</div>
 
       <section id="depoimentos" className="sec" style={{background:'#0F0F0F'}}>
         <div className="inner">
