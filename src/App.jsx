@@ -53,7 +53,7 @@ function ParticleField() {
         if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(201,168,76,${p.o})`
+        ctx.fillStyle = `rgba(212,175,106,${p.o})`
         ctx.fill()
       })
       particles.forEach((a, i) => particles.slice(i + 1).forEach(b => {
@@ -61,7 +61,7 @@ function ParticleField() {
         if (d < 120) {
           ctx.beginPath()
           ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y)
-          ctx.strokeStyle = `rgba(201,168,76,${0.08 * (1 - d / 120)})`
+          ctx.strokeStyle = `rgba(212,175,106,${0.08 * (1 - d / 120)})`
           ctx.lineWidth = 0.5; ctx.stroke()
         }
       }))
@@ -103,7 +103,7 @@ export default function App() {
     setTimeout(() => setHeroReady(true), 200)
     const onScroll = () => {
       setScrolled(window.scrollY > 60)
-      const ids = ['home','sobre','servicos','agenda','depoimentos','contato']
+      const ids = ['home','sobre','servicos','precos','agenda','depoimentos','contato']
       for (const id of [...ids].reverse()) {
         const el = document.getElementById(id)
         if (el && window.scrollY >= el.offsetTop - 130) { setActiveSection(id); break }
@@ -118,22 +118,31 @@ export default function App() {
   const scrollTo = (id) => { setMobileOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
 
   const services = [
-    { num: '01', name: 'Corte', desc: 'Corte com tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
-    { num: '02', name: 'Barba', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
-    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
-    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
-    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '30min', icon: '✨' },
-    { num: '06', name: 'Corte + Barba + Sobrancelha', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h', icon: '👑' },
+    { num: '01', name: 'Corte', desc: 'Corte com tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 50', time: '30min', icon: '✂' },
+    { num: '02', name: 'Barba', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 45', time: '30min', icon: '🪒' },
+    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 85', time: '1h', icon: '⭐' },
+    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 60', time: '30min', icon: '💎' },
+    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 65', time: '30min', icon: '✨' },
+    { num: '06', name: 'Corte + Barba + Sobrancelha', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 90', time: '1h', icon: '👑' },
+  ]
+
+  const priceList = [
+    { name: 'Corte', price: 'R$ 50,00' },
+    { name: 'Barba', price: 'R$ 45,00' },
+    { name: 'Corte + Barba', price: 'R$ 85,00' },
+    { name: 'Corte + Sobrancelha', price: 'R$ 60,00' },
+    { name: 'Corte + Hidratação', price: 'R$ 65,00' },
+    { name: 'Corte + Barba + Sobrancelha', price: 'R$ 90,00' },
   ]
 
   const schedule = [
     { day: 'Dom', closed: true },
     { day: 'Seg', closed: true },
-    { day: 'Ter', hours: '09h', end: '19h', closed: false },
-    { day: 'Qua', hours: '09h', end: '19h', closed: false },
-    { day: 'Qui', hours: '09h', end: '19h', closed: false },
-    { day: 'Sex', hours: '09h', end: '19h', closed: false },
-    { day: 'Sáb', hours: '08h', end: '17h', closed: false },
+    { day: 'Ter', hours: '09h', end: '19h30', closed: false },
+    { day: 'Qua', hours: '09h', end: '19h30', closed: false },
+    { day: 'Qui', hours: '09h', end: '19h30', closed: false },
+    { day: 'Sex', hours: '09h', end: '19h30', closed: false },
+    { day: 'Sáb', hours: '09h', end: '19h30', closed: false },
   ]
 
   const testimonials = [
@@ -144,21 +153,22 @@ export default function App() {
 
   const navLinks = [
     { id: 'home', label: 'Início' }, { id: 'sobre', label: 'Sobre' },
-    { id: 'servicos', label: 'Serviços' }, { id: 'agenda', label: 'Agenda' },
-    { id: 'depoimentos', label: 'Avaliações' }, { id: 'contato', label: 'Contato' },
+    { id: 'servicos', label: 'Serviços' }, { id: 'precos', label: 'Preços' },
+    { id: 'agenda', label: 'Agenda' }, { id: 'depoimentos', label: 'Avaliações' },
+    { id: 'contato', label: 'Contato' },
   ]
 
   return (
-    <div style={{ fontFamily:"'Barlow',sans-serif", background:'#0A0A0A', color:'#F5F0E8', overflowX:'hidden' }}>
-      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+    <div style={{ fontFamily:"'Barlow',sans-serif", background:'#070605', color:'#F5EFE3', overflowX:'hidden' }}>
+      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet" />
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         html{scroll-behavior:smooth}
-        :root{--gold:#C9A84C;--gold-l:#E8C96A;--gold-d:#8B6914;--dark:#0A0A0A;--dark2:#0F0F0F;--mid:#181818;--mid2:#202020;--muted:#9A9080;--light:#F5F0E8;--red:#c0392b}
-        .oswald{font-family:'Oswald',sans-serif} .bc{font-family:'Barlow Condensed',sans-serif}
-        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0A0A0A} ::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
+        :root{--gold:#D4AF6A;--gold-l:#F0D78C;--gold-d:#7A5C1E;--gold-deep:#5C4318;--dark:#070605;--dark2:#0C0A08;--mid:#15110C;--mid2:#1E1812;--muted:#9A9080;--light:#F5EFE3;--red:#c0392b;--cream:#E8DCC4}
+        .oswald{font-family:'Oswald',sans-serif} .bc{font-family:'Barlow Condensed',sans-serif} .serif{font-family:'Playfair Display',serif}
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#070605} ::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
         .nav{position:fixed;top:0;left:0;right:0;z-index:1000;transition:all 0.4s}
-        .nav.scrolled{background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.12);box-shadow:0 4px 30px rgba(0,0,0,0.4)}
+        .nav.scrolled{background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(212,175,106,0.12);box-shadow:0 4px 30px rgba(0,0,0,0.4)}
         .nav-inner{max-width:1280px;margin:0 auto;padding:0 2.5rem;height:72px;display:flex;align-items:center;justify-content:space-between}
         .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
         .nav-logo img{height:38px;width:auto;transition:transform 0.3s} .nav-logo:hover img{transform:rotate(-5deg) scale(1.05)}
@@ -168,21 +178,21 @@ export default function App() {
         .nl::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
         .nl:hover,.nl.active{color:var(--gold)} .nl:hover::after,.nl.active::after{transform:scaleX(1)}
         .nav-cta{background:var(--gold)!important;color:var(--dark)!important;padding:0.55rem 1.5rem;border-radius:2px;font-weight:700!important;transition:all 0.2s!important}
-        .nav-cta:hover{background:var(--gold-l)!important;transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.3)!important} .nav-cta::after{display:none!important}
-        .hamburger{display:none;background:none;border:1px solid rgba(201,168,76,0.3);border-radius:2px;cursor:pointer;color:var(--light);padding:6px 8px;transition:all 0.2s}
+        .nav-cta:hover{background:var(--gold-l)!important;transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,106,0.3)!important} .nav-cta::after{display:none!important}
+        .hamburger{display:none;background:none;border:1px solid rgba(212,175,106,0.3);border-radius:2px;cursor:pointer;color:var(--light);padding:6px 8px;transition:all 0.2s}
         .hamburger:hover{border-color:var(--gold);color:var(--gold)}
         .mmenu{position:fixed;inset:0;background:rgba(10,10,10,0.99);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
         .mmenu.open{opacity:1;pointer-events:all}
         .mmenu-link{font-family:'Oswald',sans-serif;font-size:2.5rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--light);background:none;border:none;cursor:pointer;transition:color 0.2s} .mmenu-link:hover{color:var(--gold)}
         .mmenu-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s} .mmenu-close:hover{color:var(--gold)}
         .btn-g{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--gold);color:var(--dark);padding:0.7rem 1.8rem;border:none;border-radius:2px;cursor:pointer;transition:all 0.3s}
-        .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.35)}
+        .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(212,175,106,0.35)}
         .btn-o{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:transparent;color:var(--gold);padding:0.7rem 1.8rem;border:1px solid var(--gold);border-radius:2px;cursor:pointer;transition:all 0.3s}
-        .btn-o:hover{background:var(--gold);color:var(--dark);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.25)}
+        .btn-o:hover{background:var(--gold);color:var(--dark);transform:translateY(-3px);box-shadow:0 12px 35px rgba(212,175,106,0.25)}
         .hero{position:relative;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;justify-items:center;padding:120px 2.5rem 4rem;overflow:hidden}
-        .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.08) 0%, transparent 50%);pointer-events:none;z-index:2}
+        .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(212,175,106,0.08) 0%, transparent 50%);pointer-events:none;z-index:2}
         .hero-left{display:flex;flex-direction:column;gap:1.5rem;position:relative;z-index:3;justify-self:end;padding-right:3rem}
-        .hero-badge{display:inline-flex;align-items:center;gap:0.75rem;font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.3);padding:0.6rem 1.2rem;border-radius:20px;width:fit-content;background:rgba(201,168,76,0.05)}
+        .hero-badge{display:inline-flex;align-items:center;gap:0.75rem;font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(212,175,106,0.3);padding:0.6rem 1.2rem;border-radius:20px;width:fit-content;background:rgba(212,175,106,0.05)}
         .hero-h1{font-family:'Oswald',sans-serif;font-size:3.5rem;font-weight:700;line-height:1.1;letter-spacing:-0.02em;color:var(--light)}
         .hero-h1 .gold{color:var(--gold)}
         .hero-h1 .outline{color:var(--light);text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:6px}
@@ -191,9 +201,9 @@ export default function App() {
         .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
         .hero-right{position:relative;display:flex;align-items:center;justify-content:center;height:550px;z-index:3;justify-self:start}
         .jeff-portrait-wrap{position:relative;width:320px;height:420px}
-        .jeff-circle{position:relative;width:100%;height:100%;border-radius:50% 50% 45% 45%;overflow:hidden;background:linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%);border:2px solid rgba(201,168,76,0.3);box-shadow:0 0 60px rgba(201,168,76,0.2), inset 0 0 40px rgba(201,168,76,0.1);animation:float 6s ease-in-out infinite}
+        .jeff-circle{position:relative;width:100%;height:100%;border-radius:50% 50% 45% 45%;overflow:hidden;background:linear-gradient(135deg, rgba(212,175,106,0.2) 0%, rgba(212,175,106,0.05) 100%);border:2px solid rgba(212,175,106,0.3);box-shadow:0 0 60px rgba(212,175,106,0.2), inset 0 0 40px rgba(212,175,106,0.1);animation:float 6s ease-in-out infinite}
         .jeff-circle img{width:100%;height:100%;object-fit:cover;object-position:center}
-        .jeff-glow{position:absolute;inset:-20px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 30% 30%, rgba(201,168,76,0.15) 0%, transparent 70%);filter:blur(30px);animation:pulse-glow 4s ease-in-out infinite;pointer-events:none}
+        .jeff-glow{position:absolute;inset:-20px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 30% 30%, rgba(212,175,106,0.15) 0%, transparent 70%);filter:blur(30px);animation:pulse-glow 4s ease-in-out infinite;pointer-events:none}
         .jeff-label{position:absolute;bottom:0;left:0;right:0;z-index:5;padding:1.5rem 1.2rem;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent)}
         .jeff-label-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.1rem;letter-spacing:0.15em;text-transform:uppercase;color:#fff}
         .jeff-label-role{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-top:0.2rem}
@@ -215,7 +225,7 @@ export default function App() {
         .about-cards{display:flex;flex-direction:column;gap:1px}
         .acard{background:var(--mid);border-left:2px solid var(--gold);padding:1.5rem 1.8rem;transition:background 0.3s,transform 0.3s;cursor:default}
         .acard:hover{background:var(--mid2);transform:translateX(6px)}
-        .acard-icon{width:36px;height:36px;background:rgba(201,168,76,0.1);border-radius:2px;display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem;color:var(--gold)}
+        .acard-icon{width:36px;height:36px;background:rgba(212,175,106,0.1);border-radius:2px;display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem;color:var(--gold)}
         .acard-title{font-family:'Oswald',sans-serif;font-size:0.95rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--light);margin-bottom:0.4rem}
         .acard-text{font-size:0.85rem;color:var(--muted);line-height:1.65}
         .counters{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04);margin-top:2.5rem}
@@ -224,15 +234,43 @@ export default function App() {
         .counter-label{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;display:block}
         .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
         .svc{background:var(--dark2);padding:2.2rem 2rem;position:relative;overflow:hidden;transition:background 0.3s,transform 0.3s;cursor:default}
-        .svc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.05) 0%,transparent 60%);opacity:0;transition:opacity 0.3s}
+        .svc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,106,0.05) 0%,transparent 60%);opacity:0;transition:opacity 0.3s}
         .svc:hover{background:var(--mid);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,0.4)} .svc:hover::after{opacity:1}
         .svc-icon{font-size:1.5rem;margin-bottom:0.8rem;display:block}
-        .svc-num{font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:rgba(201,168,76,0.08);line-height:1;position:absolute;top:1rem;right:1.5rem}
+        .svc-num{font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:rgba(212,175,106,0.08);line-height:1;position:absolute;top:1rem;right:1.5rem}
         .svc-name{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--light);margin-bottom:0.7rem}
         .svc-desc{font-size:0.83rem;color:var(--muted);line-height:1.7;margin-bottom:1.8rem}
         .svc-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.05);padding-top:1.2rem}
         .svc-price{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold)}
         .svc-time{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.15em;color:var(--muted);display:flex;align-items:center;gap:4px}
+        .price-section{position:relative;padding:6rem 2.5rem;background:radial-gradient(ellipse at top,#1A140A 0%,#0A0805 55%,#050402 100%);overflow:hidden}
+        .price-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(212,175,106,0.08) 0%,transparent 60%);pointer-events:none}
+        .price-card{position:relative;max-width:680px;margin:0 auto;background:linear-gradient(170deg,#0F0B07 0%,#1B130A 50%,#0A0704 100%);border:1px solid rgba(212,175,106,0.25);border-radius:6px;padding:3.5rem 3rem 3rem;box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 60px rgba(212,175,106,0.06),inset 0 1px 0 rgba(212,175,106,0.15)}
+        .price-card::before{content:'';position:absolute;inset:10px;border:1px solid rgba(212,175,106,0.18);border-radius:4px;pointer-events:none}
+        .price-card::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(to right,transparent,rgba(212,175,106,0.6),transparent)}
+        .price-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:0.8rem}
+        .price-brand{font-family:'Playfair Display',serif;font-weight:700;font-size:2.6rem;letter-spacing:0.04em;text-align:center;line-height:1;margin-bottom:0.3rem;background:linear-gradient(180deg,#F5EFE3 0%,#D4AF6A 60%,#7A5C1E 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+        .price-brand .it{font-style:italic;font-weight:600}
+        .price-tagline{font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:0.95rem;color:var(--cream);text-align:center;letter-spacing:0.05em;margin-bottom:0.6rem}
+        .price-stars{display:flex;justify-content:center;gap:4px;margin-bottom:2rem}
+        .price-divider{width:80px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:0 auto 2rem}
+        .price-list{margin:0 0 2rem;padding:0;list-style:none}
+        .price-row{display:flex;align-items:baseline;gap:0.8rem;padding:0.95rem 0;border-bottom:1px dashed rgba(212,175,106,0.18)}
+        .price-row:last-child{border-bottom:none}
+        .price-row.addon{padding-left:1.5rem;border-bottom:1px dashed rgba(212,175,106,0.1)}
+        .price-row .pl-name{font-family:'Oswald',sans-serif;font-weight:500;font-size:1rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--light);flex:0 0 auto}
+        .price-row.addon .pl-name{font-weight:400;font-size:0.92rem;color:var(--cream);text-transform:none;letter-spacing:0.02em}
+        .price-row.addon .pl-name::before{content:'+ ';color:var(--gold);font-weight:600;margin-right:4px}
+        .price-row .pl-dots{flex:1;border-bottom:1px dotted rgba(212,175,106,0.25);transform:translateY(-4px);min-width:30px}
+        .price-row .pl-val{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.05rem;color:var(--gold);letter-spacing:0.05em;flex:0 0 auto}
+        .price-section-title{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.32em;text-transform:uppercase;color:var(--muted);margin:1.8rem 0 0.6rem;text-align:center}
+        .price-meta{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:2rem;padding-top:1.8rem;border-top:1px solid rgba(212,175,106,0.18)}
+        .pmeta{text-align:center}
+        .pmeta-l{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem}
+        .pmeta-v{font-family:'Oswald',sans-serif;font-size:0.95rem;font-weight:600;color:var(--cream);letter-spacing:0.06em}
+        .pmeta-v.gold{color:var(--gold)}
+        .price-cta-row{display:flex;justify-content:center;gap:0.8rem;margin-top:2rem;flex-wrap:wrap}
+        .price-side-info{max-width:680px;margin:2rem auto 0;text-align:center;font-size:0.78rem;color:var(--muted);letter-spacing:0.04em;line-height:1.7}
         .agenda-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(255,255,255,0.04)}
         .dcard{background:var(--dark2);padding:1.8rem 0.5rem;text-align:center;position:relative;transition:background 0.2s,transform 0.2s}
         .dcard:not(.closed):hover{background:var(--mid);transform:translateY(-3px)}
@@ -245,10 +283,10 @@ export default function App() {
         .jeff-full{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:grayscale(10%) contrast(1.12) brightness(0.8);transition:transform 0.8s,filter 0.5s}
         .jeff-img-side:hover .jeff-full{transform:scale(1.04);filter:grayscale(0%) contrast(1.08) brightness(0.85)}
         .jeff-ov1{position:absolute;inset:0;background:radial-gradient(ellipse at 40% 50%,transparent 30%,rgba(0,0,0,0.5) 100%);z-index:2;pointer-events:none}
-        .jeff-ov2{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,#0A0A0A 100%);z-index:3;pointer-events:none}
+        .jeff-ov2{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,#070605 100%);z-index:3;pointer-events:none}
         .jeff-ov3{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top,rgba(0,0,0,0.4),transparent);z-index:3;pointer-events:none}
         .jeff-accent{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(to right,transparent,var(--gold) 25%,transparent);z-index:5;pointer-events:none}
-        .jeff-text-wrap{background:#0A0A0A;display:flex;flex-direction:column;justify-content:center;padding:5rem 4.5rem}
+        .jeff-text-wrap{background:#070605;display:flex;flex-direction:column;justify-content:center;padding:5rem 4.5rem}
         .jeff-quote-big{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:300;font-style:italic;line-height:1.5;color:var(--light);position:relative;padding-left:1.5rem;margin-bottom:2rem}
         .jeff-quote-big::before{content:'"';position:absolute;left:-0.3rem;top:-1rem;font-size:5rem;color:var(--gold);line-height:1;font-family:'Oswald',sans-serif;font-style:normal;opacity:0.6}
         .jeff-name-big{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold)}
@@ -259,39 +297,41 @@ export default function App() {
         .test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
         .tcard{background:var(--dark2);padding:2.2rem;position:relative;transition:background 0.2s,transform 0.2s}
         .tcard:hover{background:var(--mid);transform:translateY(-3px)}
-        .tcard-quote{position:absolute;top:1rem;right:1.5rem;font-family:'Oswald',sans-serif;font-size:5rem;color:rgba(201,168,76,0.06);line-height:1;pointer-events:none}
-        .tavatar{width:46px;height:46px;border-radius:50%;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:1rem}
+        .tcard-quote{position:absolute;top:1rem;right:1.5rem;font-family:'Oswald',sans-serif;font-size:5rem;color:rgba(212,175,106,0.06);line-height:1;pointer-events:none}
+        .tavatar{width:46px;height:46px;border-radius:50%;background:rgba(212,175,106,0.12);border:1px solid rgba(212,175,106,0.25);display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:1rem}
         .tstars{display:flex;gap:3px;margin-bottom:1rem}
         .ttext{font-size:0.9rem;color:var(--muted);line-height:1.75;font-style:italic;margin-bottom:1.2rem}
         .tname{font-family:'Oswald',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.06em;color:var(--light)}
         .ttime{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.15em;color:var(--muted);margin-top:0.2rem}
         .contact-layout{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
         .citem{display:flex;align-items:flex-start;gap:1rem;margin-bottom:2rem}
-        .cicon{width:44px;height:44px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.18);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
-        .citem:hover .cicon{background:rgba(201,168,76,0.15);border-color:var(--gold)}
+        .cicon{width:44px;height:44px;background:rgba(212,175,106,0.08);border:1px solid rgba(212,175,106,0.18);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+        .citem:hover .cicon{background:rgba(212,175,106,0.15);border-color:var(--gold)}
         .clabel{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem}
         .cval{font-size:0.9rem;color:var(--muted);line-height:1.7} .cval a{color:var(--muted);text-decoration:none;transition:color 0.2s} .cval a:hover{color:var(--gold)}
         .sched-tbl{width:100%;border-collapse:collapse} .sched-tbl td{padding:0.65rem 0;font-size:0.88rem;border-bottom:1px solid rgba(255,255,255,0.04)}
         .sched-tbl td:first-child{color:var(--muted)} .sched-tbl td:last-child{text-align:right;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.05em}
         .sched-tbl .closed-row td{color:rgba(192,57,43,0.7)!important}
-        .cbox{background:var(--mid);border:1px solid rgba(201,168,76,0.12);border-radius:3px;padding:2.5rem;position:relative;overflow:hidden}
+        .cbox{background:var(--mid);border:1px solid rgba(212,175,106,0.12);border-radius:3px;padding:2.5rem;position:relative;overflow:hidden}
         .cbox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--gold-d),var(--gold),var(--gold-d))}
-        .footer{background:var(--dark2);border-top:1px solid rgba(201,168,76,0.1)}
+        .footer{background:var(--dark2);border-top:1px solid rgba(212,175,106,0.1)}
         .footer-main{max-width:1280px;margin:0 auto;padding:4rem 2.5rem 3rem;display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:3rem}
         .footer-col-t{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
         .footer-txt{font-size:0.875rem;color:var(--muted);line-height:2}
         .footer-bottom{border-top:1px solid rgba(255,255,255,0.04);padding:1.5rem 2.5rem;max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;color:rgba(154,144,128,0.45)}
-        .fbadge{font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.12);padding:0.25rem 0.8rem}
+        .fbadge{font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(212,175,106,0.3);border:1px solid rgba(212,175,106,0.12);padding:0.25rem 0.8rem}
         .amenities{background:var(--mid);border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);padding:2rem 2.5rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.5rem}
         .amen{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color 0.2s} .amen:hover{color:var(--gold)}
         @media(max-width:1024px){
           .hero{grid-template-columns:1fr} .hero-right{justify-content:flex-start;padding:2rem 2.5rem 4rem} .hero-left{padding:0}
           .jeff-portrait-wrap{width:280px} 
           .svcs{grid-template-columns:repeat(2,1fr)} .about-layout{grid-template-columns:1fr;gap:3rem}
-          .jeff-section{grid-template-columns:1fr} .jeff-img-side{min-height:500px} .jeff-ov2{background:linear-gradient(to top,#0A0A0A 0%,transparent 50%)}
+          .jeff-section{grid-template-columns:1fr} .jeff-img-side{min-height:500px} .jeff-ov2{background:linear-gradient(to top,#070605 0%,transparent 50%)}
           .jeff-text-wrap{padding:3rem 2.5rem} .test-grid{grid-template-columns:1fr 1fr} .footer-main{grid-template-columns:1fr 1fr}
         }
         @media(max-width:768px){
+          .price-section{padding:4rem 1.2rem} .price-card{padding:2.5rem 1.6rem 2rem}
+          .price-brand{font-size:2rem} .price-row .pl-name{font-size:0.92rem} .price-row .pl-val{font-size:1rem}
           .nav-links{display:none} .hamburger{display:block}
           .hero{padding:100px 1.5rem 3rem;min-height:auto;gap:3rem} .hero-left{padding:0} .hero-right{padding:3rem 0 4rem;justify-content:center} .jeff-portrait-wrap{width:100%;max-width:300px;margin:0 auto}
           .sec{padding:3rem 1.5rem} .inner{padding:0} .svcs{grid-template-columns:1fr} .agenda-wrap{grid-template-columns:repeat(4,1fr)}
@@ -349,8 +389,8 @@ export default function App() {
           <h1 className="hero-h1"><span style={{display:'block'}}>Estilo &amp;</span><span className="gold">Precisão</span><span className="outline">Redefinidos</span></h1>
           <p className="hero-sub">Mais que um corte — uma experiência premium. Transformamos seu visual com técnica, estilo e o melhor atendimento de Guarulhos.</p>
           <div className="hero-stars">
-            {[...Array(5)].map((_,i)=><Star key={i} size={14} fill="#C9A84C" color="#C9A84C"/>)}
-            <span style={{fontFamily:'Oswald',fontSize:'1rem',color:'#C9A84C',marginLeft:4}}>5.0</span>
+            {[...Array(5)].map((_,i)=><Star key={i} size={14} fill="#D4AF6A" color="#D4AF6A"/>)}
+            <span style={{fontFamily:'Oswald',fontSize:'1rem',color:'#D4AF6A',marginLeft:4}}>5.0</span>
             <span style={{fontSize:'0.82rem',color:'#9A9080'}}>· 145 avaliações no Google</span>
           </div>
           <div className="hero-actions">
@@ -371,7 +411,7 @@ export default function App() {
 
       <div className="band"><div className="band-track">{[...Array(10)].map((_,i)=><React.Fragment key={i}><span className="band-item"><span className="band-dot"/>Corte Premium</span><span className="band-item"><span className="band-dot"/>Barba Clássica</span><span className="band-item"><span className="band-dot"/>5.0 Google</span><span className="band-item"><span className="band-dot"/>Guarulhos SP</span></React.Fragment>)}</div></div>
 
-      <section id="sobre" className="sec" style={{background:'#0F0F0F'}}>
+      <section id="sobre" className="sec" style={{background:'#0C0A08'}}>
         <div className="inner">
           <div className="about-layout">
             <Reveal>
@@ -394,7 +434,7 @@ export default function App() {
         </div>
       </section>
 
-      <section id="servicos" className="sec" style={{background:'#0A0A0A'}}>
+      <section id="servicos" className="sec" style={{background:'#070605'}}>
         <div className="inner">
           <Reveal><div className="stag">O que oferecemos</div><h2 className="stitle">Nossos <span>Serviços</span></h2><div className="sdiv"/></Reveal>
           <div className="svcs">{services.map((s,i)=><Reveal key={i} delay={i*0.07}><div className="svc"><div className="svc-num">{s.num}</div><span className="svc-icon">{s.icon}</span><div className="svc-name">{s.name}</div><div className="svc-desc">{s.desc}</div><div className="svc-footer"><div className="svc-price">{s.price}</div><div className="svc-time"><Clock size={11}/>{s.time}</div></div></div></Reveal>)}</div>
@@ -402,7 +442,50 @@ export default function App() {
         </div>
       </section>
 
-      <section id="agenda" className="sec" style={{background:'#0F0F0F'}}>
+      <section id="precos" className="price-section">
+        <div className="inner" style={{position:'relative',zIndex:2}}>
+          <Reveal>
+            <div className="stag" style={{textAlign:'center'}}>Tabela oficial · Booksy</div>
+            <h2 className="stitle" style={{textAlign:'center',marginBottom:'2.5rem'}}>Lista de <span>Preços</span></h2>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <div className="price-card">
+              <div className="price-eyebrow">★ ★ ★ ★ ★</div>
+              <div className="price-brand">Trend <span className="it">Blade</span></div>
+              <div className="price-tagline">Barbearia · Guarulhos</div>
+              <div className="price-stars">{[...Array(5)].map((_,i)=><Star key={i} size={11} fill="#D4AF6A" color="#D4AF6A"/>)}</div>
+              <div className="price-divider"/>
+              <div className="price-section-title">Tabela de Serviços</div>
+              <ul className="price-list">
+                {priceList.map((p,i)=>(
+                  <li key={i} className="price-row">
+                    <span className="pl-name">{p.name}</span>
+                    <span className="pl-dots"/>
+                    <span className="pl-val">{p.price}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="price-meta">
+                <div className="pmeta">
+                  <div className="pmeta-l">Atendimento</div>
+                  <div className="pmeta-v">Terça a Sábado</div>
+                </div>
+                <div className="pmeta">
+                  <div className="pmeta-l">Horário</div>
+                  <div className="pmeta-v gold">09:00 — 19:30</div>
+                </div>
+              </div>
+              <div className="price-cta-row">
+                <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'0.78rem'}}><Calendar size={14}/> Reservar no Booksy</a>
+                <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{fontSize:'0.78rem'}}><Phone size={14}/> (11) 95123-1443</a>
+              </div>
+            </div>
+            <p className="price-side-info">Atendimento com Jeferson e Gabriel. Valores e duração conforme tabela oficial publicada no Booksy.</p>
+          </Reveal>
+        </div>
+      </section>
+
+      <section id="agenda" className="sec" style={{background:'#0C0A08'}}>
         <div className="inner">
           <Reveal><div className="stag">Funcionamento</div><h2 className="stitle">Horários de <span>Atendimento</span></h2><div className="sdiv"/></Reveal>
           <Reveal delay={0.1}>
@@ -428,35 +511,35 @@ export default function App() {
         </div>
       </div>
 
-      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Wind,t:'Ambiente Climatizado'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>)}</div>
+      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Wind,t:'Ambiente Climatizado'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#D4AF6A"/>{a.t}</div>)}</div>
 
-      <section id="depoimentos" className="sec" style={{background:'#0F0F0F'}}>
+      <section id="depoimentos" className="sec" style={{background:'#0C0A08'}}>
         <div className="inner">
           <Reveal><div className="stag">Clientes satisfeitos</div><h2 className="stitle">O que nossos <span>clientes</span> dizem</h2><div className="sdiv"/></Reveal>
-          <div className="test-grid">{testimonials.map((t,i)=><Reveal key={i} delay={i*0.1}><div className="tcard"><div className="tcard-quote">"</div><div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}><div className="tavatar">{t.initial}</div><div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div></div><div className="tstars">{[...Array(t.rating)].map((_,j)=><Star key={j} size={12} fill="#C9A84C" color="#C9A84C"/>)}</div><div className="ttext">"{t.text}"</div>{t.response && <div style={{marginTop:'1.2rem',paddingTop:'1rem',borderTop:'1px solid rgba(255,255,255,0.1)',fontSize:'0.8rem',color:'var(--gold)',fontStyle:'italic'}}>Resposta: {t.response}</div>}</div></Reveal>)}</div>
+          <div className="test-grid">{testimonials.map((t,i)=><Reveal key={i} delay={i*0.1}><div className="tcard"><div className="tcard-quote">"</div><div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}><div className="tavatar">{t.initial}</div><div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div></div><div className="tstars">{[...Array(t.rating)].map((_,j)=><Star key={j} size={12} fill="#D4AF6A" color="#D4AF6A"/>)}</div><div className="ttext">"{t.text}"</div>{t.response && <div style={{marginTop:'1.2rem',paddingTop:'1rem',borderTop:'1px solid rgba(255,255,255,0.1)',fontSize:'0.8rem',color:'var(--gold)',fontStyle:'italic'}}>Resposta: {t.response}</div>}</div></Reveal>)}</div>
         </div>
       </section>
 
-      <section id="contato" className="sec" style={{background:'#0A0A0A'}}>
+      <section id="contato" className="sec" style={{background:'#070605'}}>
         <div className="inner">
           <Reveal><div className="stag">Fale conosco</div><h2 className="stitle">Entre em <span>Contato</span></h2><div className="sdiv"/></Reveal>
           <div className="contact-layout">
             <Reveal>
               {[{icon:MapPin,label:'Endereço',val:'Av Papa Pio XII, nº 218\nGuarulhos, São Paulo'},{icon:Phone,label:'WhatsApp',val:'(11) 95123-1443',href:'https://wa.me/5511951231443'},{icon:Instagram,label:'Instagram',val:'@trendbladebarbearia',href:'https://instagram.com/trendbladebarbearia'}].map((c,i)=>(
-                <div key={i} className="citem"><div className="cicon"><c.icon size={18} color="#C9A84C"/></div><div><div className="clabel">{c.label}</div>{c.href?<div className="cval"><a href={c.href} target="_blank" rel="noopener noreferrer">{c.val}</a></div>:<div className="cval" style={{whiteSpace:'pre-line'}}>{c.val}</div>}</div></div>
+                <div key={i} className="citem"><div className="cicon"><c.icon size={18} color="#D4AF6A"/></div><div><div className="clabel">{c.label}</div>{c.href?<div className="cval"><a href={c.href} target="_blank" rel="noopener noreferrer">{c.val}</a></div>:<div className="cval" style={{whiteSpace:'pre-line'}}>{c.val}</div>}</div></div>
               ))}
-              <div className="citem"><div className="cicon"><Clock size={18} color="#C9A84C"/></div><div style={{flex:1}}><div className="clabel">Horários</div><table className="sched-tbl"><tbody><tr className="closed-row"><td>Domingo</td><td>Fechado</td></tr><tr className="closed-row"><td>Segunda</td><td>Fechado</td></tr><tr><td>Terça a Sexta</td><td>09h às 19h</td></tr><tr><td>Sábado</td><td>08h às 17h</td></tr></tbody></table></div></div>
+              <div className="citem"><div className="cicon"><Clock size={18} color="#D4AF6A"/></div><div style={{flex:1}}><div className="clabel">Horários</div><table className="sched-tbl"><tbody><tr className="closed-row"><td>Domingo</td><td>Fechado</td></tr><tr className="closed-row"><td>Segunda</td><td>Fechado</td></tr><tr><td>Terça a Sábado</td><td>09h às 19h30</td></tr></tbody></table></div></div>
             </Reveal>
             <Reveal delay={0.15}>
               <div className="cbox">
-                <div style={{fontFamily:'Oswald',fontSize:'1.1rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',color:'#C9A84C',marginBottom:'1.5rem'}}>Agende seu Horário</div>
+                <div style={{fontFamily:'Oswald',fontSize:'1.1rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',color:'#D4AF6A',marginBottom:'1.5rem'}}>Agende seu Horário</div>
                 <div style={{display:'flex',flexDirection:'column',gap:'0.8rem',marginBottom:'2rem'}}>
                   <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo" target="_blank" rel="noopener noreferrer" className="btn-g" style={{justifyContent:'center'}}><Calendar size={16}/> Agendar pelo Booksy</a>
                   <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{justifyContent:'center'}}><Phone size={16}/> WhatsApp</a>
                 </div>
                 <div style={{borderTop:'1px solid rgba(255,255,255,0.06)',paddingTop:'1.5rem'}}>
-                  <div style={{fontFamily:'Oswald',fontSize:'0.9rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',color:'#C9A84C',marginBottom:'1rem'}}>Por que nos escolher</div>
-                  {['Profissionais especializados e dedicados','Ambiente familiar e aconchegante','Técnicas modernas e tradicionais','Atendimento personalizado','Localização privilegiada em Guarulhos'].map((item,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:'0.6rem',fontSize:'0.875rem',color:'#9A9080'}}><span style={{color:'#C9A84C',fontSize:'0.6rem'}}>✦</span>{item}</div>)}
+                  <div style={{fontFamily:'Oswald',fontSize:'0.9rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',color:'#D4AF6A',marginBottom:'1rem'}}>Por que nos escolher</div>
+                  {['Profissionais especializados e dedicados','Ambiente familiar e aconchegante','Técnicas modernas e tradicionais','Atendimento personalizado','Localização privilegiada em Guarulhos'].map((item,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:'0.6rem',fontSize:'0.875rem',color:'#9A9080'}}><span style={{color:'#D4AF6A',fontSize:'0.6rem'}}>✦</span>{item}</div>)}
                 </div>
               </div>
             </Reveal>
@@ -466,11 +549,11 @@ export default function App() {
 
       <footer className="footer">
         <div className="footer-main">
-          <div><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:'1rem'}}><img src={logoImage} alt="Trend Blade" style={{height:36,width:'auto'}}/><span style={{fontFamily:'Oswald',fontWeight:700,fontSize:'1.2rem',letterSpacing:'0.1em',color:'#C9A84C'}}>TREND <span style={{color:'#F5F0E8'}}>BLADE</span></span></div><p style={{fontSize:'0.875rem',color:'var(--muted)',lineHeight:2}}>Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento familiar diferenciado.</p></div>
+          <div><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:'1rem'}}><img src={logoImage} alt="Trend Blade" style={{height:36,width:'auto'}}/><span style={{fontFamily:'Oswald',fontWeight:700,fontSize:'1.2rem',letterSpacing:'0.1em',color:'#D4AF6A'}}>TREND <span style={{color:'#F5EFE3'}}>BLADE</span></span></div><p style={{fontSize:'0.875rem',color:'var(--muted)',lineHeight:2}}>Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento familiar diferenciado.</p></div>
           <div><div className="footer-col-t">Contato</div><div className="footer-txt">(11) 95123-1443<br/>@trendbladebarbearia<br/>Av Papa Pio XII, nº 218<br/>Guarulhos, SP</div></div>
-          <div><div className="footer-col-t">Horários</div><div className="footer-txt"><span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>Ter a Sex — 09h às 19h<br/>Sáb — 08h às 17h</div></div>
+          <div><div className="footer-col-t">Horários</div><div className="footer-txt"><span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>Ter a Sáb — 09h às 19h30</div></div>
         </div>
-        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><div><span>© 2026 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><br/><span style={{fontSize:'0.65rem',color:'rgba(154,144,128,0.6)',marginTop:'0.5rem',display:'block'}}Desenvolvido por <a href="https://www.eblsolucoescorp.tec.br/" target="_blank" rel="noopener noreferrer" style={{color:'var(--gold)',textDecoration:'none',transition:'color 0.2s'}} onMouseEnter={(e)=>e.target.style.color='var(--gold-l)'} onMouseLeave={(e)=>e.target.style.color='var(--gold)'}}>@erickalmeida</a></span></div><div className="fbadge">Homologação</div></div></div>
+        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><div><span>© 2026 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><br/><span style={{fontSize:'0.65rem',color:'rgba(154,144,128,0.6)',marginTop:'0.5rem',display:'block'}}>Desenvolvido por <a href="https://www.eblsolucoescorp.tec.br/" target="_blank" rel="noopener noreferrer" style={{color:'var(--gold)',textDecoration:'none',transition:'color 0.2s'}} onMouseEnter={(e)=>e.target.style.color='var(--gold-l)'} onMouseLeave={(e)=>e.target.style.color='var(--gold)'}>@erickalmeida</a></span></div><div className="fbadge">Homologação</div></div></div>
       </footer>
     </div>
   )
