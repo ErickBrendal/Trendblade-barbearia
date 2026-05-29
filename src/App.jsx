@@ -349,25 +349,130 @@ export default function App() {
         .amen{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color 0.2s} .amen:hover{color:var(--gold)}
         .glow-cursor{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease}
         @media(max-width:1024px){
-          .hero{grid-template-columns:1fr} .hero-right{justify-content:flex-start;padding:2rem 2.5rem 4rem} .hero-left{padding:8rem 2.5rem 2rem}
-          .jeff-portrait-wrap{width:280px} .jeff-floating-badge,.jeff-floating-stars{display:none}
+          .hero{grid-template-columns:1fr;min-height:auto}
+          .hero-right{justify-content:center;padding:1rem 2.5rem 4rem;order:-1}
+          .hero-left{padding:6rem 2.5rem 2rem;text-align:left}
+          .jeff-portrait-wrap{width:260px} .jeff-floating-badge,.jeff-floating-stars{display:none}
           .svcs{grid-template-columns:repeat(2,1fr)} .about-layout{grid-template-columns:1fr;gap:3rem}
-          .jeff-section{grid-template-columns:1fr} .jeff-img-side{min-height:500px} .jeff-ov2{background:linear-gradient(to top,#0A0A0A 0%,transparent 50%)}
+          .jeff-section{grid-template-columns:1fr} .jeff-img-side{min-height:420px} .jeff-ov2{background:linear-gradient(to top,#0A0A0A 0%,transparent 50%)}
           .jeff-text-wrap{padding:3rem 2.5rem} .test-grid{grid-template-columns:1fr 1fr} .footer-main{grid-template-columns:1fr 1fr}
-          .gallery-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,240px)}
+          .gallery-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,220px)}
           .gphoto.large{grid-column:span 2;grid-row:span 1} .gphoto.tall{grid-column:span 1;grid-row:span 1}
+          .glow-cursor{display:none}
         }
         @media(max-width:768px){
           .nav-links{display:none} .hamburger{display:block}
-          .hero-left{padding:7rem 1.5rem 2rem} .hero-right{padding:2rem 1.5rem 4rem} .jeff-portrait-wrap{width:100%;max-width:320px}
-          .sec{padding:5rem 0} .inner{padding:0 1.5rem} .svcs{grid-template-columns:1fr} .agenda-wrap{grid-template-columns:repeat(4,1fr)}
-          .test-grid{grid-template-columns:1fr} .contact-layout{grid-template-columns:1fr;gap:2.5rem}
-          .footer-main{grid-template-columns:1fr;gap:2rem;padding:3rem 1.5rem 2rem} .footer-bottom{flex-direction:column;gap:1rem;text-align:center;padding:1.5rem}
-          .jeff-grid{grid-template-columns:1fr} .counters{grid-template-columns:repeat(3,1fr)} .hero-actions{flex-direction:column;align-items:flex-start}
-          .hero-h1{font-size:clamp(2.8rem,9vw,4.5rem)}
-          .gallery-grid{grid-template-columns:1fr;grid-template-rows:repeat(4,260px)} .gphoto.large,.gphoto.tall,.gphoto.small{grid-column:span 1;grid-row:span 1}
+          .nav-inner{padding:0 1.25rem;height:64px}
+          .nav-logo img{height:32px}
+          .logo-text{font-size:1.1rem;letter-spacing:0.08em}
+
+          .hero{padding:0}
+          .hero-left{padding:5.5rem 1.25rem 2rem;align-items:flex-start}
+          .hero-right{padding:1rem 1.25rem 2rem}
+          .jeff-portrait-wrap{width:78%;max-width:280px}
+          .hero-badge{font-size:0.6rem;letter-spacing:0.25em;padding:0.35rem 0.8rem;margin-bottom:1.25rem}
+          .hero-h1{font-size:clamp(2.8rem,11vw,3.8rem);line-height:0.95;margin-bottom:1.25rem;letter-spacing:0.01em}
+          .hero-sub{font-size:0.92rem;line-height:1.65;margin-bottom:1.5rem;max-width:100%}
+          .hero-stars{padding:0.65rem 0.9rem;margin-bottom:1.75rem;flex-wrap:wrap}
+          .hero-stars span:last-child{font-size:0.72rem}
+          .hero-actions{flex-direction:column;align-items:stretch;width:100%;gap:0.7rem}
+          .hero-actions .btn-g,.hero-actions .btn-o{justify-content:center;width:100%;padding:1rem 1.5rem;font-size:0.78rem;letter-spacing:0.15em}
+
+          .sec{padding:4rem 0}
+          .inner{padding:0 1.25rem}
+          .stag{font-size:0.6rem;letter-spacing:0.3em;margin-bottom:0.5rem}
+          .stag::before{width:18px}
+          .stitle{font-size:clamp(1.85rem,7.5vw,2.4rem);margin-bottom:0.6rem}
+          .sdiv{margin-bottom:1.75rem}
+
+          .about-layout{gap:2.5rem}
+          .about-text p{font-size:0.93rem;line-height:1.7;margin-bottom:1.1rem}
+          .counters{grid-template-columns:repeat(3,1fr);margin-top:1.75rem}
+          .counter-box{padding:1.25rem 0.5rem}
+          .counter-num{font-size:1.75rem}
+          .counter-label{font-size:0.55rem;letter-spacing:0.18em}
+          .acard{padding:1.2rem 1.3rem}
+          .acard-icon{width:32px;height:32px;margin-bottom:0.6rem}
+          .acard-title{font-size:0.88rem}
+          .acard-text{font-size:0.82rem;line-height:1.6}
+
+          .svcs{grid-template-columns:1fr;gap:1px}
+          .svc{padding:1.7rem 1.4rem}
+          .svc-num{font-size:2.2rem;top:0.8rem;right:1rem}
+          .svc-icon{font-size:1.3rem;margin-bottom:0.6rem}
+          .svc-name{font-size:0.95rem}
+          .svc-desc{font-size:0.85rem;line-height:1.6;margin-bottom:1.3rem;min-height:auto}
+          .svc-price{font-size:1.4rem}
+          .svc-footer{padding-top:1rem}
+
+          .agenda-wrap{grid-template-columns:repeat(7,1fr);gap:2px}
+          .dcard{padding:1rem 0.2rem}
+          .dname{font-size:0.55rem;letter-spacing:0.15em;margin-bottom:0.5rem}
+          .dhours{font-size:0.7rem;line-height:1.3}
+          .dhours .end{font-size:0.62rem}
+          .dcard.closed::after{font-size:0.42rem;letter-spacing:0.08em;padding:0.1rem 0.25rem}
+
+          .gallery-grid{grid-template-columns:1fr;grid-template-rows:auto;gap:6px}
+          .gphoto{height:240px}
+          .gphoto.large,.gphoto.tall,.gphoto.small{grid-column:span 1;grid-row:span 1;height:240px}
+          .gphoto-caption{padding:1rem}
+          .gphoto-title{font-size:0.95rem}
+          .gphoto-sub{font-size:0.62rem;letter-spacing:0.2em}
+          .gphoto-corner{font-size:0.55rem;padding:0.2rem 0.5rem;top:8px;left:8px}
+          .gphoto::after{width:28px;height:28px;top:8px;right:8px;opacity:1;transform:scale(1)}
+
+          .jeff-section{grid-template-columns:1fr;min-height:auto}
+          .jeff-img-side{min-height:380px}
+          .jeff-text-wrap{padding:2.5rem 1.25rem}
+          .jeff-quote-big{font-size:1.2rem;padding-left:1.2rem;margin-bottom:1.5rem;line-height:1.5}
+          .jeff-quote-big::before{font-size:3.5rem;top:-0.6rem}
+          .jeff-name-big{font-size:1.1rem;letter-spacing:0.1em}
+          .jeff-role-big{font-size:0.62rem;letter-spacing:0.2em}
+          .jeff-grid{grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.75rem;padding-top:1.5rem}
+          .jspec-l{font-size:0.55rem}
+          .jspec-v{font-size:0.85rem}
+
+          .amenities{padding:1.5rem 1.25rem;gap:1.2rem}
+          .amen{font-size:0.68rem;letter-spacing:0.08em}
+
+          .test-grid{grid-template-columns:1fr}
+          .tcard{padding:1.7rem 1.4rem}
+          .tcard-quote{font-size:3.5rem;top:0.6rem;right:1rem}
+          .tavatar{width:40px;height:40px;font-size:1rem}
+          .tname{font-size:0.85rem}
+          .ttime{font-size:0.6rem}
+          .ttext{font-size:0.85rem;line-height:1.65}
+
+          .contact-layout{grid-template-columns:1fr;gap:2rem}
+          .citem{margin-bottom:1.5rem;gap:0.85rem}
+          .cicon{width:38px;height:38px}
+          .clabel{font-size:0.55rem;letter-spacing:0.2em}
+          .cval{font-size:0.85rem}
+          .sched-tbl td{padding:0.55rem 0;font-size:0.82rem}
+          .cbox{padding:1.75rem 1.4rem}
+
+          .footer-main{grid-template-columns:1fr;gap:2rem;padding:2.5rem 1.25rem 1.75rem}
+          .footer-col-t{font-size:0.6rem;letter-spacing:0.25em;margin-bottom:0.9rem}
+          .footer-txt{font-size:0.82rem;line-height:1.85}
+          .footer-bottom{flex-direction:column;gap:0.75rem;text-align:center;padding:1.25rem;font-size:0.68rem}
+
+          .mmenu-link{font-size:1.8rem;letter-spacing:0.06em}
+          .mmenu{gap:1.5rem}
+
+          .band{padding:0.75rem 0}
+          .band-item{font-size:0.7rem;padding:0 1.5rem;letter-spacing:0.15em}
         }
-        @media(max-width:480px){.agenda-wrap{grid-template-columns:repeat(3,1fr)} .hero-h1{font-size:clamp(2.5rem,10vw,3.5rem)}}
+        @media(max-width:480px){
+          .hero-h1{font-size:clamp(2.4rem,11vw,3.2rem)}
+          .agenda-wrap{grid-template-columns:repeat(7,1fr);gap:1px}
+          .dcard{padding:0.85rem 0.15rem}
+          .dname{font-size:0.5rem;letter-spacing:0.1em}
+          .dhours{font-size:0.62rem}
+          .dhours .end{font-size:0.55rem}
+          .gphoto{height:200px}
+          .gphoto.large,.gphoto.tall,.gphoto.small{height:200px}
+          .jeff-grid{grid-template-columns:1fr}
+        }
       `}</style>
 
       <Lightbox src={lightbox} onClose={() => setLightbox(null)} />
