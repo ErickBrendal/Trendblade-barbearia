@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors, ChevronDown, Menu, X, Award, Users, Heart } from 'lucide-react'
+import { Star, MapPin, Clock, Phone, Instagram, Calendar, Wifi, CreditCard, Scissors, ChevronDown, Menu, X, Award, Users, Heart, Camera } from 'lucide-react'
 import logoImage from './assets/IMG_7057.jpg'
 import jeffersonImage from './assets/jefferson.jpg'
+import fachada1 from './assets/fachada1.jpg'
+import fachada2 from './assets/fachada2.jpg'
+import equipe from './assets/equipe.jpg'
+import poste from './assets/poste.jpg'
 import './App.css'
+
+const AGENDAMENTO_URL = 'https://cashbarber.com.br/trendblade'
 
 function useInView(threshold = 0.12) {
   const ref = useRef(null)
@@ -92,18 +98,46 @@ function Counter({ target, suffix = '', duration = 2000 }) {
   return <span ref={ref}>{count}{suffix}</span>
 }
 
+function Lightbox({ src, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
+  }, [onClose])
+  if (!src) return null
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 10000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', cursor: 'pointer',
+      animation: 'fadeIn 0.25s ease'
+    }}>
+      <button onClick={onClose} style={{
+        position: 'absolute', top: '1.5rem', right: '2rem', background: 'rgba(201,168,76,0.15)',
+        border: '1px solid rgba(201,168,76,0.4)', color: '#C9A84C', padding: '0.5rem 0.7rem',
+        cursor: 'pointer', borderRadius: 2
+      }}><X size={20} /></button>
+      <img src={src} alt="" style={{
+        maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain',
+        boxShadow: '0 30px 80px rgba(0,0,0,0.8)', border: '1px solid rgba(201,168,76,0.3)'
+      }} onClick={e => e.stopPropagation()} />
+    </div>
+  )
+}
+
 export default function App() {
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [heroReady, setHeroReady] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [lightbox, setLightbox] = useState(null)
 
   useEffect(() => {
     setTimeout(() => setHeroReady(true), 200)
     const onScroll = () => {
       setScrolled(window.scrollY > 60)
-      const ids = ['home','sobre','servicos','agenda','depoimentos','contato']
+      const ids = ['home','sobre','servicos','agenda','galeria','depoimentos','contato']
       for (const id of [...ids].reverse()) {
         const el = document.getElementById(id)
         if (el && window.scrollY >= el.offsetTop - 130) { setActiveSection(id); break }
@@ -118,22 +152,22 @@ export default function App() {
   const scrollTo = (id) => { setMobileOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
 
   const services = [
-    { num: '01', name: 'Corte Clássico', desc: 'Tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 45', time: '30min', icon: '✂' },
-    { num: '02', name: 'Barba Completa', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 40', time: '30min', icon: '🪒' },
-    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito com desconto especial. Transformação completa em uma única visita.', price: 'R$ 75', time: '1h', icon: '⭐' },
-    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 55', time: '30min', icon: '💎' },
-    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 60', time: '45min', icon: '✨' },
-    { num: '06', name: 'Pacote Completo', desc: 'Cabelo + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 80', time: '1h30', icon: '👑' },
+    { num: '01', name: 'Corte', desc: 'Tesoura ou máquina com acabamento impecável. Inclui lavagem e finalização profissional.', price: 'R$ 50', icon: '✂' },
+    { num: '02', name: 'Barba', desc: 'Modelagem artesanal, toalha quente e finalização com óleo premium para total cuidado.', price: 'R$ 45', icon: '🪒' },
+    { num: '03', name: 'Corte + Barba', desc: 'O combo perfeito. Transformação completa em uma única visita.', price: 'R$ 85', icon: '⭐' },
+    { num: '04', name: 'Corte + Sobrancelha', desc: 'Corte preciso combinado com design de sobrancelha masculina para visual definido.', price: 'R$ 60', icon: '💎' },
+    { num: '05', name: 'Corte + Hidratação', desc: 'Estilo e tratamento capilar com produtos premium para cabelos saudáveis e brilhantes.', price: 'R$ 65', icon: '✨' },
+    { num: '06', name: 'Pacote Completo', desc: 'Corte + Barba + Sobrancelha. A experiência Trend Blade completa e exclusiva.', price: 'R$ 90', icon: '👑' },
   ]
 
   const schedule = [
     { day: 'Dom', closed: true },
     { day: 'Seg', closed: true },
-    { day: 'Ter', hours: '09h', end: '19h', closed: false },
-    { day: 'Qua', hours: '09h', end: '19h', closed: false },
-    { day: 'Qui', hours: '09h', end: '19h', closed: false },
-    { day: 'Sex', hours: '09h', end: '19h', closed: false },
-    { day: 'Sáb', hours: '08h', end: '17h', closed: false },
+    { day: 'Ter', hours: '09h', end: '19h30', closed: false },
+    { day: 'Qua', hours: '09h', end: '19h30', closed: false },
+    { day: 'Qui', hours: '09h', end: '19h30', closed: false },
+    { day: 'Sex', hours: '09h', end: '19h30', closed: false },
+    { day: 'Sáb', hours: '09h', end: '19h30', closed: false },
   ]
 
   const testimonials = [
@@ -145,7 +179,15 @@ export default function App() {
   const navLinks = [
     { id: 'home', label: 'Início' }, { id: 'sobre', label: 'Sobre' },
     { id: 'servicos', label: 'Serviços' }, { id: 'agenda', label: 'Agenda' },
+    { id: 'galeria', label: 'Galeria' },
     { id: 'depoimentos', label: 'Avaliações' }, { id: 'contato', label: 'Contato' },
+  ]
+
+  const galleryItems = [
+    { src: fachada1, title: 'Fachada Premium', subtitle: 'Nossa loja em Guarulhos', size: 'large' },
+    { src: equipe, title: 'Nossa Equipe', subtitle: 'Profissionais dedicados', size: 'tall' },
+    { src: poste, title: 'Ambiente Clássico', subtitle: 'Identidade autêntica', size: 'small' },
+    { src: fachada2, title: 'Entrada Acolhedora', subtitle: 'Aberto Ter–Sáb · 09h às 19h30', size: 'small' },
   ]
 
   return (
@@ -154,77 +196,47 @@ export default function App() {
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         html{scroll-behavior:smooth}
-        :root{
-          --gold:#C9A84C;--gold-l:#E8C96A;--gold-d:#8B6914;
-          --dark:#0A0A0A;--dark2:#0F0F0F;--mid:#181818;--mid2:#202020;
-          --muted:#9A9080;--light:#F5F0E8;--red:#c0392b;
-        }
-        .oswald{font-family:'Oswald',sans-serif}
-        .bc{font-family:'Barlow Condensed',sans-serif}
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar{width:4px}
-        ::-webkit-scrollbar-track{background:#0A0A0A}
-        ::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
-
-        /* NAV */
+        :root{--gold:#C9A84C;--gold-l:#E8C96A;--gold-d:#8B6914;--dark:#0A0A0A;--dark2:#0F0F0F;--mid:#181818;--mid2:#202020;--muted:#9A9080;--light:#F5F0E8;--red:#c0392b}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .oswald{font-family:'Oswald',sans-serif} .bc{font-family:'Barlow Condensed',sans-serif}
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0A0A0A} ::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
         .nav{position:fixed;top:0;left:0;right:0;z-index:1000;transition:all 0.4s}
         .nav.scrolled{background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.12);box-shadow:0 4px 30px rgba(0,0,0,0.4)}
         .nav-inner{max-width:1280px;margin:0 auto;padding:0 2.5rem;height:72px;display:flex;align-items:center;justify-content:space-between}
         .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
-        .nav-logo img{height:38px;width:auto;transition:transform 0.3s}
-        .nav-logo:hover img{transform:rotate(-5deg) scale(1.05)}
-        .logo-text{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;letter-spacing:0.1em;color:var(--gold)}
-        .logo-text span{color:var(--light)}
-        .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+        .nav-logo img{height:38px;width:auto;transition:transform 0.3s} .nav-logo:hover img{transform:rotate(-5deg) scale(1.05)}
+        .logo-text{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;letter-spacing:0.1em;color:var(--gold)} .logo-text span{color:var(--light)}
+        .nav-links{display:flex;align-items:center;gap:1.8rem;list-style:none}
         .nl{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;transition:color 0.2s;padding:0;position:relative}
         .nl::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
-        .nl:hover,.nl.active{color:var(--gold)}
-        .nl:hover::after,.nl.active::after{transform:scaleX(1)}
-        .nav-cta{background:var(--gold)!important;color:var(--dark)!important;padding:0.55rem 1.5rem;border-radius:2px;font-weight:700!important;letter-spacing:0.12em!important;transition:all 0.2s!important}
-        .nav-cta:hover{background:var(--gold-l)!important;transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.3)!important}
-        .nav-cta::after{display:none!important}
+        .nl:hover,.nl.active{color:var(--gold)} .nl:hover::after,.nl.active::after{transform:scaleX(1)}
+        .nav-cta{background:var(--gold)!important;color:var(--dark)!important;padding:0.55rem 1.5rem;border-radius:2px;font-weight:700!important;transition:all 0.2s!important}
+        .nav-cta:hover{background:var(--gold-l)!important;transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.3)!important} .nav-cta::after{display:none!important}
         .hamburger{display:none;background:none;border:1px solid rgba(201,168,76,0.3);border-radius:2px;cursor:pointer;color:var(--light);padding:6px 8px;transition:all 0.2s}
         .hamburger:hover{border-color:var(--gold);color:var(--gold)}
-
-        /* MOBILE MENU */
         .mmenu{position:fixed;inset:0;background:rgba(10,10,10,0.99);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
         .mmenu.open{opacity:1;pointer-events:all}
-        .mmenu-link{font-family:'Oswald',sans-serif;font-size:2.5rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--light);background:none;border:none;cursor:pointer;transition:color 0.2s}
-        .mmenu-link:hover{color:var(--gold)}
-        .mmenu-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s}
-        .mmenu-close:hover{color:var(--gold)}
-
-        /* BTNS */
+        .mmenu-link{font-family:'Oswald',sans-serif;font-size:2.3rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--light);background:none;border:none;cursor:pointer;transition:color 0.2s} .mmenu-link:hover{color:var(--gold)}
+        .mmenu-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s} .mmenu-close:hover{color:var(--gold)}
         .btn-g{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--gold);color:var(--dark);padding:0.95rem 2.2rem;border:none;border-radius:2px;cursor:pointer;text-decoration:none;transition:all 0.25s;position:relative;overflow:hidden}
         .btn-g::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,0.15) 50%,transparent 60%);transform:translateX(-100%);transition:transform 0.5s}
-        .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.35)}
-        .btn-g:hover::before{transform:translateX(100%)}
+        .btn-g:hover{background:var(--gold-l);transform:translateY(-3px);box-shadow:0 12px 35px rgba(201,168,76,0.35)} .btn-g:hover::before{transform:translateX(100%)}
         .btn-o{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:transparent;color:var(--gold);padding:0.95rem 2.2rem;border:1px solid rgba(201,168,76,0.4);border-radius:2px;cursor:pointer;text-decoration:none;transition:all 0.25s}
         .btn-o:hover{background:rgba(201,168,76,0.08);border-color:var(--gold);transform:translateY(-2px)}
-
-        /* SECTION */
-        .sec{padding:7rem 0}
-        .inner{max-width:1280px;margin:0 auto;padding:0 2.5rem}
+        .sec{padding:7rem 0} .inner{max-width:1280px;margin:0 auto;padding:0 2.5rem}
         .stag{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
         .stag::before{content:'';width:24px;height:1px;background:var(--gold)}
-        .stitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,4vw,3.2rem);text-transform:uppercase;line-height:1;letter-spacing:0.02em;margin-bottom:0.8rem}
-        .stitle span{color:var(--gold)}
+        .stitle{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,4vw,3.2rem);text-transform:uppercase;line-height:1;letter-spacing:0.02em;margin-bottom:0.8rem} .stitle span{color:var(--gold)}
         .sdiv{width:40px;height:2px;background:var(--gold);margin-bottom:2.5rem}
-
-        /* HERO */
         .hero{min-height:100vh;display:grid;grid-template-columns:55% 45%;position:relative;overflow:hidden}
         .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,0.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,168,76,0.03) 0%,transparent 50%);z-index:0}
         .hero-left{display:flex;flex-direction:column;justify-content:center;padding:9rem 3rem 6rem 6rem;position:relative;z-index:2}
         .hero-badge{display:inline-flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.25);padding:0.45rem 1.1rem;margin-bottom:2rem;width:fit-content;background:rgba(201,168,76,0.04)}
         .hero-h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(3.5rem,5.5vw,6.5rem);line-height:0.9;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:1.8rem}
-        .hero-h1 .gold{color:var(--gold);display:block}
-        .hero-h1 .outline{-webkit-text-stroke:1px rgba(255,255,255,0.3);color:transparent;display:block}
+        .hero-h1 .gold{color:var(--gold);display:block} .hero-h1 .outline{-webkit-text-stroke:1px rgba(255,255,255,0.3);color:transparent;display:block}
         .hero-sub{font-size:1rem;color:var(--muted);line-height:1.8;max-width:400px;margin-bottom:2rem}
         .hero-stars{display:flex;align-items:center;gap:0.4rem;margin-bottom:2.5rem;padding:0.8rem 1.2rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:3px;width:fit-content}
         .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
-
-        /* JEFFERSON PORTRAIT CARD */
         .hero-right{position:relative;display:flex;align-items:center;justify-content:center;padding:7rem 3rem 5rem 0;z-index:2}
         .jeff-portrait-wrap{position:relative;width:340px;max-width:90%;flex-shrink:0}
         .jeff-portrait-frame{position:relative;border-radius:4px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(201,168,76,0.15)}
@@ -232,21 +244,17 @@ export default function App() {
         .jeff-portrait-img{width:100%;display:block;object-fit:cover;object-position:center top;filter:grayscale(10%) contrast(1.12) brightness(0.82) sepia(8%);transition:transform 0.8s ease,filter 0.5s}
         .jeff-portrait-wrap:hover .jeff-portrait-img{transform:scale(1.03);filter:grayscale(0%) contrast(1.08) brightness(0.88) sepia(4%)}
         .jeff-gold-border{position:absolute;top:-8px;left:-8px;right:8px;bottom:8px;border:1px solid rgba(201,168,76,0.3);border-radius:4px;z-index:0;pointer-events:none}
-        .jeff-label{position:absolute;bottom:0;left:0;right:0;z-index:5;padding:1.5rem 1.2rem;pointer-events:none}
+        .jeff-label{position:absolute;bottom:0;left:0;right:0;z-index:5;padding:1.5rem 1.2rem;pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent)}
         .jeff-label-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.1rem;letter-spacing:0.15em;text-transform:uppercase;color:#fff}
         .jeff-label-role{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-top:0.2rem}
         .jeff-deco-line{position:absolute;top:50%;right:-20px;width:1px;height:80px;background:linear-gradient(to bottom,transparent,var(--gold),transparent);transform:translateY(-50%)}
         .jeff-floating-badge{position:absolute;top:20px;right:-50px;background:var(--gold);color:var(--dark);font-family:'Oswald',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.1em;padding:0.5rem 0.8rem;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 24px rgba(201,168,76,0.4)}
         .jeff-floating-stars{position:absolute;bottom:80px;right:-60px;background:rgba(10,10,10,0.9);border:1px solid rgba(201,168,76,0.2);padding:0.6rem 0.8rem;display:flex;flex-direction:column;align-items:center;gap:2px}
-
-        /* BAND */
-        .band{background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-d));padding:1rem 0;overflow:hidden;position:relative}
-        .band-track{display:flex;gap:0;animation:marquee 25s linear infinite;white-space:nowrap}
+        .band{background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-d));padding:1rem 0;overflow:hidden}
+        .band-track{display:flex;animation:marquee 25s linear infinite;white-space:nowrap}
         @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
         .band-item{font-family:'Oswald',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--dark);padding:0 2.5rem;display:inline-flex;align-items:center;gap:0.8rem;flex-shrink:0}
         .band-dot{width:4px;height:4px;background:var(--dark);border-radius:50%;opacity:0.4}
-
-        /* SOBRE */
         .about-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
         .about-text p{font-size:1rem;color:var(--muted);line-height:1.85;margin-bottom:1.5rem}
         .about-cards{display:flex;flex-direction:column;gap:1px}
@@ -259,35 +267,45 @@ export default function App() {
         .counter-box{background:var(--dark2);padding:1.8rem 1rem;text-align:center}
         .counter-num{font-family:'Oswald',sans-serif;font-size:2.5rem;font-weight:700;color:var(--gold);line-height:1;display:block}
         .counter-label{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem;display:block}
-
-        /* SERVICES */
         .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
-        .svc{background:var(--dark2);padding:2.2rem 2rem;position:relative;overflow:hidden;transition:background 0.3s,transform 0.3s;cursor:default;group:true}
+        .svc{background:var(--dark2);padding:2.2rem 2rem;position:relative;overflow:hidden;transition:background 0.3s,transform 0.3s;cursor:default}
         .svc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.05) 0%,transparent 60%);opacity:0;transition:opacity 0.3s}
-        .svc:hover{background:var(--mid);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,0.4)}
-        .svc:hover::after{opacity:1}
+        .svc:hover{background:var(--mid);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,0.4)} .svc:hover::after{opacity:1}
         .svc-icon{font-size:1.5rem;margin-bottom:0.8rem;display:block}
         .svc-num{font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:rgba(201,168,76,0.08);line-height:1;position:absolute;top:1rem;right:1.5rem}
         .svc-name{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--light);margin-bottom:0.7rem}
-        .svc-desc{font-size:0.83rem;color:var(--muted);line-height:1.7;margin-bottom:1.8rem}
+        .svc-desc{font-size:0.83rem;color:var(--muted);line-height:1.7;margin-bottom:1.8rem;min-height:62px}
         .svc-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.05);padding-top:1.2rem}
         .svc-price{font-family:'Oswald',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold)}
-        .svc-time{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.15em;color:var(--muted);display:flex;align-items:center;gap:4px}
-
-        /* AGENDA */
         .agenda-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(255,255,255,0.04)}
         .dcard{background:var(--dark2);padding:1.8rem 0.5rem;text-align:center;position:relative;transition:background 0.2s,transform 0.2s}
         .dcard:not(.closed):hover{background:var(--mid);transform:translateY(-3px)}
         .dcard.closed{opacity:0.35}
         .dcard.closed::after{content:'FECHADO';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font-family:'Barlow Condensed',sans-serif;font-size:0.52rem;font-weight:700;letter-spacing:0.15em;color:var(--red);border:1px solid var(--red);padding:0.15rem 0.4rem;white-space:nowrap}
         .dname{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem}
-        .dhours{font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--light);line-height:1.6}
-        .dhours .end{display:block;font-size:0.75rem;color:var(--muted)}
+        .dhours{font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--light);line-height:1.6} .dhours .end{display:block;font-size:0.75rem;color:var(--muted)}
 
-        /* JEFF FULL SECTION */
-        .jeff-section{display:grid;grid-template-columns:45% 55%;min-height:700px;position:relative;overflow:hidden}
+        /* GALERIA INSANA */
+        .gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,280px);gap:8px;margin-top:1rem}
+        .gphoto{position:relative;overflow:hidden;cursor:pointer;background:#000;border-radius:2px}
+        .gphoto.large{grid-column:span 2;grid-row:span 2}
+        .gphoto.tall{grid-column:span 1;grid-row:span 2}
+        .gphoto.small{grid-column:span 1;grid-row:span 1}
+        .gphoto img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1.2s cubic-bezier(.16,1,.3,1),filter 0.6s;filter:grayscale(15%) brightness(0.85) contrast(1.1)}
+        .gphoto:hover img{transform:scale(1.08);filter:grayscale(0%) brightness(1) contrast(1.05)}
+        .gphoto::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.1) 50%,transparent 100%);z-index:2;opacity:0.7;transition:opacity 0.3s;pointer-events:none}
+        .gphoto:hover::before{opacity:0.5}
+        .gphoto::after{content:'';position:absolute;top:12px;right:12px;width:32px;height:32px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:2px;display:flex;align-items:center;justify-content:center;z-index:4;opacity:0;transform:scale(0.8);transition:all 0.3s;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2'><path d='M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7'/></svg>");background-repeat:no-repeat;background-position:center}
+        .gphoto:hover::after{opacity:1;transform:scale(1)}
+        .gphoto-caption{position:absolute;bottom:0;left:0;right:0;padding:1.5rem;z-index:3;transform:translateY(8px);opacity:0.92;transition:all 0.4s}
+        .gphoto:hover .gphoto-caption{transform:translateY(0);opacity:1}
+        .gphoto-title{font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#fff;margin-bottom:0.3rem;text-shadow:0 2px 8px rgba(0,0,0,0.7)}
+        .gphoto-sub{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);text-shadow:0 2px 8px rgba(0,0,0,0.7)}
+        .gphoto-corner{position:absolute;top:12px;left:12px;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);background:rgba(10,10,10,0.7);border:1px solid rgba(201,168,76,0.3);padding:0.25rem 0.6rem;z-index:3}
+
+        .jeff-section{display:grid;grid-template-columns:45% 55%;min-height:700px}
         .jeff-img-side{position:relative;overflow:hidden}
-        .jeff-full{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:grayscale(10%) contrast(1.12) brightness(0.8);transition:transform 0.8s ease,filter 0.5s}
+        .jeff-full{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;filter:grayscale(10%) contrast(1.12) brightness(0.8);transition:transform 0.8s,filter 0.5s}
         .jeff-img-side:hover .jeff-full{transform:scale(1.04);filter:grayscale(0%) contrast(1.08) brightness(0.85)}
         .jeff-ov1{position:absolute;inset:0;background:radial-gradient(ellipse at 40% 50%,transparent 30%,rgba(0,0,0,0.5) 100%);z-index:2;pointer-events:none}
         .jeff-ov2{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,#0A0A0A 100%);z-index:3;pointer-events:none}
@@ -301,213 +319,133 @@ export default function App() {
         .jeff-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.06)}
         .jspec-l{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:0.25rem}
         .jspec-v{font-family:'Oswald',sans-serif;font-size:0.95rem;color:var(--light)}
-
-        /* TESTIMONIALS */
         .test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04)}
         .tcard{background:var(--dark2);padding:2.2rem;position:relative;transition:background 0.2s,transform 0.2s}
         .tcard:hover{background:var(--mid);transform:translateY(-3px)}
         .tcard-quote{position:absolute;top:1rem;right:1.5rem;font-family:'Oswald',sans-serif;font-size:5rem;color:rgba(201,168,76,0.06);line-height:1;pointer-events:none}
-        .tavatar{width:46px;height:46px;border-radius:50%;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:1rem;flex-shrink:0}
+        .tavatar{width:46px;height:46px;border-radius:50%;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:600;color:var(--gold)}
         .tstars{display:flex;gap:3px;margin-bottom:1rem}
         .ttext{font-size:0.9rem;color:var(--muted);line-height:1.75;font-style:italic;margin-bottom:1.2rem}
         .tname{font-family:'Oswald',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:0.06em;color:var(--light)}
         .ttime{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.15em;color:var(--muted);margin-top:0.2rem}
-
-        /* CONTACT */
         .contact-layout{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
         .citem{display:flex;align-items:flex-start;gap:1rem;margin-bottom:2rem}
         .cicon{width:44px;height:44px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.18);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
         .citem:hover .cicon{background:rgba(201,168,76,0.15);border-color:var(--gold)}
         .clabel{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem}
-        .cval{font-size:0.9rem;color:var(--muted);line-height:1.7}
-        .cval a{color:var(--muted);text-decoration:none;transition:color 0.2s}
-        .cval a:hover{color:var(--gold)}
-        .sched-tbl{width:100%;border-collapse:collapse}
-        .sched-tbl td{padding:0.65rem 0;font-size:0.88rem;border-bottom:1px solid rgba(255,255,255,0.04)}
-        .sched-tbl td:first-child{color:var(--muted)}
-        .sched-tbl td:last-child{text-align:right;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.05em}
+        .cval{font-size:0.9rem;color:var(--muted);line-height:1.7} .cval a{color:var(--muted);text-decoration:none;transition:color 0.2s} .cval a:hover{color:var(--gold)}
+        .sched-tbl{width:100%;border-collapse:collapse} .sched-tbl td{padding:0.65rem 0;font-size:0.88rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .sched-tbl td:first-child{color:var(--muted)} .sched-tbl td:last-child{text-align:right;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.05em}
         .sched-tbl .closed-row td{color:rgba(192,57,43,0.7)!important}
         .cbox{background:var(--mid);border:1px solid rgba(201,168,76,0.12);border-radius:3px;padding:2.5rem;position:relative;overflow:hidden}
         .cbox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--gold-d),var(--gold),var(--gold-d))}
-
-        /* FOOTER */
         .footer{background:var(--dark2);border-top:1px solid rgba(201,168,76,0.1)}
         .footer-main{max-width:1280px;margin:0 auto;padding:4rem 2.5rem 3rem;display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:3rem}
         .footer-col-t{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
         .footer-txt{font-size:0.875rem;color:var(--muted);line-height:2}
         .footer-bottom{border-top:1px solid rgba(255,255,255,0.04);padding:1.5rem 2.5rem;max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;color:rgba(154,144,128,0.45)}
         .fbadge{font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.12);padding:0.25rem 0.8rem}
-
-        /* AMENITIES STRIP */
         .amenities{background:var(--mid);border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);padding:2rem 2.5rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.5rem}
-        .amen{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color 0.2s}
-        .amen:hover{color:var(--gold)}
-
-        /* GLOW CURSOR */
+        .amen{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color 0.2s} .amen:hover{color:var(--gold)}
         .glow-cursor{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease}
-
-        /* RESPONSIVE */
         @media(max-width:1024px){
-          .hero{grid-template-columns:1fr}
-          .hero-right{justify-content:flex-start;padding:2rem 2.5rem 4rem}
-          .hero-left{padding:8rem 2.5rem 2rem}
-          .jeff-portrait-wrap{width:280px}
-          .jeff-floating-badge,.jeff-floating-stars{display:none}
-          .svcs{grid-template-columns:repeat(2,1fr)}
-          .about-layout{grid-template-columns:1fr;gap:3rem}
-          .jeff-section{grid-template-columns:1fr}
-          .jeff-img-side{min-height:500px}
-          .jeff-ov2{background:linear-gradient(to top,#0A0A0A 0%,transparent 50%)}
-          .jeff-text-wrap{padding:3rem 2.5rem}
-          .test-grid{grid-template-columns:1fr 1fr}
-          .footer-main{grid-template-columns:1fr 1fr}
+          .hero{grid-template-columns:1fr} .hero-right{justify-content:flex-start;padding:2rem 2.5rem 4rem} .hero-left{padding:8rem 2.5rem 2rem}
+          .jeff-portrait-wrap{width:280px} .jeff-floating-badge,.jeff-floating-stars{display:none}
+          .svcs{grid-template-columns:repeat(2,1fr)} .about-layout{grid-template-columns:1fr;gap:3rem}
+          .jeff-section{grid-template-columns:1fr} .jeff-img-side{min-height:500px} .jeff-ov2{background:linear-gradient(to top,#0A0A0A 0%,transparent 50%)}
+          .jeff-text-wrap{padding:3rem 2.5rem} .test-grid{grid-template-columns:1fr 1fr} .footer-main{grid-template-columns:1fr 1fr}
+          .gallery-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,240px)}
+          .gphoto.large{grid-column:span 2;grid-row:span 1} .gphoto.tall{grid-column:span 1;grid-row:span 1}
         }
         @media(max-width:768px){
-          .nav-links{display:none}
-          .hamburger{display:block}
-          .hero-left{padding:7rem 1.5rem 2rem}
-          .hero-right{padding:2rem 1.5rem 4rem}
-          .jeff-portrait-wrap{width:100%;max-width:320px}
-          .sec{padding:5rem 0}
-          .inner{padding:0 1.5rem}
-          .svcs{grid-template-columns:1fr}
-          .agenda-wrap{grid-template-columns:repeat(4,1fr)}
-          .test-grid{grid-template-columns:1fr}
-          .contact-layout{grid-template-columns:1fr;gap:2.5rem}
-          .footer-main{grid-template-columns:1fr;gap:2rem;padding:3rem 1.5rem 2rem}
-          .footer-bottom{flex-direction:column;gap:1rem;text-align:center;padding:1.5rem}
-          .jeff-grid{grid-template-columns:1fr}
-          .counters{grid-template-columns:repeat(3,1fr)}
-          .hero-actions{flex-direction:column;align-items:flex-start}
+          .nav-links{display:none} .hamburger{display:block}
+          .hero-left{padding:7rem 1.5rem 2rem} .hero-right{padding:2rem 1.5rem 4rem} .jeff-portrait-wrap{width:100%;max-width:320px}
+          .sec{padding:5rem 0} .inner{padding:0 1.5rem} .svcs{grid-template-columns:1fr} .agenda-wrap{grid-template-columns:repeat(4,1fr)}
+          .test-grid{grid-template-columns:1fr} .contact-layout{grid-template-columns:1fr;gap:2.5rem}
+          .footer-main{grid-template-columns:1fr;gap:2rem;padding:3rem 1.5rem 2rem} .footer-bottom{flex-direction:column;gap:1rem;text-align:center;padding:1.5rem}
+          .jeff-grid{grid-template-columns:1fr} .counters{grid-template-columns:repeat(3,1fr)} .hero-actions{flex-direction:column;align-items:flex-start}
           .hero-h1{font-size:clamp(2.8rem,9vw,4.5rem)}
+          .gallery-grid{grid-template-columns:1fr;grid-template-rows:repeat(4,260px)} .gphoto.large,.gphoto.tall,.gphoto.small{grid-column:span 1;grid-row:span 1}
         }
-        @media(max-width:480px){
-          .agenda-wrap{grid-template-columns:repeat(3,1fr)}
-          .hero-h1{font-size:clamp(2.5rem,10vw,3.5rem)}
-        }
+        @media(max-width:480px){.agenda-wrap{grid-template-columns:repeat(3,1fr)} .hero-h1{font-size:clamp(2.5rem,10vw,3.5rem)}}
       `}</style>
 
-      {/* GLOW CURSOR */}
-      <div className="glow-cursor" style={{ left: `${mousePos.x * 100}%`, top: `${mousePos.y * 100}%` }} />
+      <Lightbox src={lightbox} onClose={() => setLightbox(null)} />
 
-      {/* MOBILE MENU */}
-      <div className={`mmenu ${mobileOpen ? 'open' : ''}`}>
-        <button className="mmenu-close" onClick={() => setMobileOpen(false)}><X size={30} /></button>
-        {navLinks.map(l => <button key={l.id} className="mmenu-link" onClick={() => scrollTo(l.id)}>{l.label}</button>)}
-        <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-           target="_blank" rel="noopener noreferrer" className="btn-g" style={{ fontSize: '1rem', padding: '1rem 2.5rem' }}>
-          <Calendar size={18} /> Agendar Agora
-        </a>
+      <div className="glow-cursor" style={{ left:`${mousePos.x*100}%`, top:`${mousePos.y*100}%` }} />
+
+      <div className={`mmenu ${mobileOpen?'open':''}`}>
+        <button className="mmenu-close" onClick={()=>setMobileOpen(false)}><X size={30}/></button>
+        {navLinks.map(l=><button key={l.id} className="mmenu-link" onClick={()=>scrollTo(l.id)}>{l.label}</button>)}
+        <a href={AGENDAMENTO_URL} target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'1rem',padding:'1rem 2.5rem'}}><Calendar size={18}/> Agendar Agora</a>
       </div>
 
-      {/* NAV */}
-      <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
+      <nav className={`nav ${scrolled?'scrolled':''}`}>
         <div className="nav-inner">
-          <div className="nav-logo" onClick={() => scrollTo('home')}>
-            <img src={logoImage} alt="Trend Blade" />
+          <div className="nav-logo" onClick={()=>scrollTo('home')}>
+            <img src={logoImage} alt="Trend Blade"/>
             <span className="logo-text">TREND <span>BLADE</span></span>
           </div>
           <ul className="nav-links">
-            {navLinks.map(l => (
-              <li key={l.id}><button className={`nl ${activeSection === l.id ? 'active' : ''}`} onClick={() => scrollTo(l.id)}>{l.label}</button></li>
-            ))}
-            <li><a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                   target="_blank" rel="noopener noreferrer" className="nl nav-cta bc">Agendar</a></li>
+            {navLinks.map(l=><li key={l.id}><button className={`nl ${activeSection===l.id?'active':''}`} onClick={()=>scrollTo(l.id)}>{l.label}</button></li>)}
+            <li><a href={AGENDAMENTO_URL} target="_blank" rel="noopener noreferrer" className="nl nav-cta bc">Agendar</a></li>
           </ul>
-          <button className="hamburger" onClick={() => setMobileOpen(true)}><Menu size={22} /></button>
+          <button className="hamburger" onClick={()=>setMobileOpen(true)}><Menu size={22}/></button>
         </div>
       </nav>
 
-      {/* HERO */}
       <section id="home" className="hero">
-        <div className="hero-bg" />
-        <ParticleField />
-        <div className="hero-left" style={{ opacity: heroReady ? 1 : 0, transform: heroReady ? 'none' : 'translateY(30px)', transition: 'all 0.9s cubic-bezier(.16,1,.3,1)' }}>
+        <div className="hero-bg"/><ParticleField/>
+        <div className="hero-left" style={{opacity:heroReady?1:0,transform:heroReady?'none':'translateY(30px)',transition:'all 0.9s cubic-bezier(.16,1,.3,1)'}}>
           <div className="hero-badge">✦ Barbearia Premium · Guarulhos, SP</div>
-          <h1 className="hero-h1">
-            <span style={{ display: 'block' }}>Estilo &amp;</span>
-            <span className="gold">Precisão</span>
-            <span className="outline">Redefinidos</span>
-          </h1>
+          <h1 className="hero-h1"><span style={{display:'block'}}>Estilo &amp;</span><span className="gold">Precisão</span><span className="outline">Redefinidos</span></h1>
           <p className="hero-sub">Mais que um corte — uma experiência premium. Transformamos seu visual com técnica, estilo e o melhor atendimento de Guarulhos.</p>
           <div className="hero-stars">
-            {[...Array(5)].map((_,i) => <Star key={i} size={14} fill="#C9A84C" color="#C9A84C" />)}
-            <span style={{ fontFamily:'Oswald', fontSize:'1rem', color:'#C9A84C', marginLeft:4 }}>5.0</span>
-            <span style={{ fontSize:'0.82rem', color:'#9A9080' }}>· 145 avaliações no Google</span>
+            {[...Array(5)].map((_,i)=><Star key={i} size={14} fill="#C9A84C" color="#C9A84C"/>)}
+            <span style={{fontFamily:'Oswald',fontSize:'1rem',color:'#C9A84C',marginLeft:4}}>5.0</span>
+            <span style={{fontSize:'0.82rem',color:'#9A9080'}}>· 145 avaliações no Google</span>
           </div>
           <div className="hero-actions">
-            <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-               target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16} /> Agendar Agora</a>
-            <button className="btn-o" onClick={() => scrollTo('servicos')}><Scissors size={16} /> Ver Serviços</button>
+            <a href={AGENDAMENTO_URL} target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16}/> Agendar Agora</a>
+            <button className="btn-o" onClick={()=>scrollTo('galeria')}><Camera size={16}/> Conheça a Barbearia</button>
           </div>
         </div>
-
-        <div className="hero-right" style={{ opacity: heroReady ? 1 : 0, transition: 'opacity 1.2s ease 0.4s' }}>
+        <div className="hero-right" style={{opacity:heroReady?1:0,transition:'opacity 1.2s ease 0.4s'}}>
           <div className="jeff-portrait-wrap">
-            <div className="jeff-gold-border" />
+            <div className="jeff-gold-border"/>
             <div className="jeff-portrait-frame">
               <img className="jeff-portrait-img" src={jeffersonImage} alt="Jefferson — Fundador Trend Blade"
-                   onError={e => { e.target.parentElement.style.background='linear-gradient(180deg,#1a1510,#2a2015)'; e.target.parentElement.style.minHeight='500px'; e.target.style.display='none' }} />
+                   onError={e=>{e.target.parentElement.style.background='linear-gradient(180deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px';e.target.style.display='none'}}/>
             </div>
-            <div className="jeff-label">
-              <div className="jeff-label-name">Jefferson</div>
-              <div className="jeff-label-role">Fundador & Master Barber</div>
-            </div>
-            <div className="jeff-deco-line" />
+            <div className="jeff-label"><div className="jeff-label-name">Jefferson</div><div className="jeff-label-role">Fundador & Master Barber</div></div>
+            <div className="jeff-deco-line"/>
             <div className="jeff-floating-badge">Master Barber ✦</div>
             <div className="jeff-floating-stars">
-              <div style={{ display:'flex', gap:2 }}>{[...Array(5)].map((_,i) => <Star key={i} size={10} fill="#C9A84C" color="#C9A84C" />)}</div>
-              <div style={{ fontFamily:'Oswald', fontSize:'0.7rem', color:'#C9A84C', marginTop:2 }}>5.0/5</div>
+              <div style={{display:'flex',gap:2}}>{[...Array(5)].map((_,i)=><Star key={i} size={10} fill="#C9A84C" color="#C9A84C"/>)}</div>
+              <div style={{fontFamily:'Oswald',fontSize:'0.7rem',color:'#C9A84C',marginTop:2}}>5.0/5</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* BAND */}
-      <div className="band">
-        <div className="band-track">
-          {[...Array(10)].map((_,i) => (
-            <React.Fragment key={i}>
-              <span className="band-item"><span className="band-dot"/>Corte Premium</span>
-              <span className="band-item"><span className="band-dot"/>Barba Clássica</span>
-              <span className="band-item"><span className="band-dot"/>5.0 Google</span>
-              <span className="band-item"><span className="band-dot"/>Guarulhos SP</span>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
+      <div className="band"><div className="band-track">{[...Array(10)].map((_,i)=><React.Fragment key={i}><span className="band-item"><span className="band-dot"/>Corte Premium</span><span className="band-item"><span className="band-dot"/>Barba Clássica</span><span className="band-item"><span className="band-dot"/>5.0 Google</span><span className="band-item"><span className="band-dot"/>Guarulhos SP</span></React.Fragment>)}</div></div>
 
-      {/* SOBRE */}
-      <section id="sobre" className="sec" style={{ background:'#0F0F0F' }}>
+      <section id="sobre" className="sec" style={{background:'#0F0F0F'}}>
         <div className="inner">
           <div className="about-layout">
             <Reveal>
-              <div className="stag">Nossa história</div>
-              <h2 className="stitle">Sobre a <span>Trend Blade</span></h2>
-              <div className="sdiv" />
-              <div className="about-text">
-                <p>Localizada no coração de Guarulhos, a Trend Blade Barbearia nasceu da paixão por transformar o cuidado masculino em uma experiência única. Combinamos técnicas tradicionais com tendências modernas.</p>
-                <p>Cada cliente que entra pela nossa porta é tratado com atenção personalizada, em um ambiente aconchegante onde estilo, conforto e qualidade se encontram.</p>
-              </div>
+              <div className="stag">Nossa história</div><h2 className="stitle">Sobre a <span>Trend Blade</span></h2><div className="sdiv"/>
+              <div className="about-text"><p>Localizada no coração de Guarulhos, a Trend Blade Barbearia nasceu da paixão por transformar o cuidado masculino em uma experiência única. Combinamos técnicas tradicionais com tendências modernas.</p><p>Cada cliente que entra pela nossa porta é tratado com atenção personalizada, em um ambiente aconchegante onde estilo, conforto e qualidade se encontram.</p></div>
               <div className="counters">
-                <div className="counter-box"><span className="counter-num"><Counter target={5} suffix=".0" /></span><span className="counter-label">Nota Google</span></div>
-                <div className="counter-box"><span className="counter-num"><Counter target={145} suffix="+" /></span><span className="counter-label">Avaliações</span></div>
-                <div className="counter-box"><span className="counter-num"><Counter target={10} suffix="+" /></span><span className="counter-label">Anos exp.</span></div>
+                <div className="counter-box"><span className="counter-num"><Counter target={5} suffix=".0"/></span><span className="counter-label">Nota Google</span></div>
+                <div className="counter-box"><span className="counter-num"><Counter target={145} suffix="+"/></span><span className="counter-label">Avaliações</span></div>
+                <div className="counter-box"><span className="counter-num"><Counter target={10} suffix="+"/></span><span className="counter-label">Anos exp.</span></div>
               </div>
             </Reveal>
             <Reveal delay={0.15}>
               <div className="about-cards">
-                {[
-                  { icon: Award, title: 'Experiência Premium', text: 'Cada cliente recebe atenção personalizada em um ambiente sofisticado e aconchegante.' },
-                  { icon: Scissors, title: 'Técnica Apurada', text: 'Profissionais sempre atualizados com as últimas tendências e técnicas de barbearia.' },
-                  { icon: Heart, title: 'Ambiente Familiar', text: 'Um espaço acolhedor onde você se sente em casa — tranquilo, confortável e exclusivo.' },
-                  { icon: Users, title: 'Atendimento Dedicado', text: 'Cada visita é única. Conhecemos você, seu estilo e suas preferências pessoais.' },
-                ].map((c,i) => (
-                  <div key={i} className="acard">
-                    <div className="acard-icon"><c.icon size={18} /></div>
-                    <div className="acard-title">{c.title}</div>
-                    <div className="acard-text">{c.text}</div>
-                  </div>
+                {[{icon:Award,title:'Experiência Premium',text:'Cada cliente recebe atenção personalizada em um ambiente sofisticado e aconchegante.'},{icon:Scissors,title:'Técnica Apurada',text:'Profissionais sempre atualizados com as últimas tendências e técnicas de barbearia.'},{icon:Heart,title:'Ambiente Familiar',text:'Um espaço acolhedor onde você se sente em casa — tranquilo, confortável e exclusivo.'},{icon:Users,title:'Atendimento Dedicado',text:'Cada visita é única. Conhecemos você, seu estilo e suas preferências pessoais.'}].map((c,i)=>(
+                  <div key={i} className="acard"><div className="acard-icon"><c.icon size={18}/></div><div className="acard-title">{c.title}</div><div className="acard-text">{c.text}</div></div>
                 ))}
               </div>
             </Reveal>
@@ -515,163 +453,96 @@ export default function App() {
         </div>
       </section>
 
-      {/* SERVIÇOS */}
-      <section id="servicos" className="sec" style={{ background:'#0A0A0A' }}>
+      <section id="servicos" className="sec" style={{background:'#0A0A0A'}}>
         <div className="inner">
-          <Reveal><div className="stag">O que oferecemos</div><h2 className="stitle">Nossos <span>Serviços</span></h2><div className="sdiv" /></Reveal>
-          <div className="svcs">
-            {services.map((s,i) => (
-              <Reveal key={i} delay={i*0.07}>
-                <div className="svc">
-                  <div className="svc-num">{s.num}</div>
-                  <span className="svc-icon">{s.icon}</span>
-                  <div className="svc-name">{s.name}</div>
-                  <div className="svc-desc">{s.desc}</div>
-                  <div className="svc-footer">
-                    <div className="svc-price">{s.price}</div>
-                    <div className="svc-time"><Clock size={11}/>{s.time}</div>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-          <Reveal delay={0.3}>
-            <div style={{ marginTop:'3rem', display:'flex', gap:'1rem', flexWrap:'wrap', alignItems:'center' }}>
-              <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                 target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16}/> Agendar pelo Booksy</a>
-              <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o"><Phone size={16}/> WhatsApp</a>
+          <Reveal><div className="stag">O que oferecemos</div><h2 className="stitle">Nossos <span>Serviços</span></h2><div className="sdiv"/></Reveal>
+          <div className="svcs">{services.map((s,i)=><Reveal key={i} delay={i*0.07}><div className="svc"><div className="svc-num">{s.num}</div><span className="svc-icon">{s.icon}</span><div className="svc-name">{s.name}</div><div className="svc-desc">{s.desc}</div><div className="svc-footer"><div className="svc-price">{s.price}</div></div></div></Reveal>)}</div>
+          <Reveal delay={0.3}><div style={{marginTop:'3rem',display:'flex',gap:'1rem',flexWrap:'wrap'}}><a href={AGENDAMENTO_URL} target="_blank" rel="noopener noreferrer" className="btn-g"><Calendar size={16}/> Agendar Online</a><a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o"><Phone size={16}/> WhatsApp</a></div></Reveal>
+        </div>
+      </section>
+
+      <section id="agenda" className="sec" style={{background:'#0F0F0F'}}>
+        <div className="inner">
+          <Reveal><div className="stag">Funcionamento</div><h2 className="stitle">Horários de <span>Atendimento</span></h2><div className="sdiv"/></Reveal>
+          <Reveal delay={0.1}>
+            <div className="agenda-wrap">
+              {schedule.map((d,i)=><div key={i} className={`dcard ${d.closed?'closed':''}`}><div className="dname">{d.day}</div>{!d.closed?<div className="dhours">{d.hours}<span className="end">{d.end}</span></div>:<div className="dhours" style={{color:'#9A9080'}}>—</div>}</div>)}
             </div>
+            <p style={{marginTop:'1.5rem',fontSize:'0.78rem',color:'#9A9080',letterSpacing:'0.04em'}}>* Domingo e Segunda-feira: fechado. Agendamentos online ou via WhatsApp.</p>
           </Reveal>
         </div>
       </section>
 
-      {/* AGENDA */}
-      <section id="agenda" className="sec" style={{ background:'#0F0F0F' }}>
+      {/* GALERIA INSANA */}
+      <section id="galeria" className="sec" style={{background:'#0A0A0A'}}>
         <div className="inner">
-          <Reveal><div className="stag">Funcionamento</div><h2 className="stitle">Horários de <span>Atendimento</span></h2><div className="sdiv" /></Reveal>
+          <Reveal><div className="stag">Conheça o espaço</div><h2 className="stitle">Nossa <span>Barbearia</span></h2><div className="sdiv"/></Reveal>
           <Reveal delay={0.1}>
-            <div className="agenda-wrap">
-              {schedule.map((d,i) => (
-                <div key={i} className={`dcard ${d.closed?'closed':''}`}>
-                  <div className="dname">{d.day}</div>
-                  {!d.closed ? <div className="dhours">{d.hours}<span className="end">{d.end}</span></div>
-                    : <div className="dhours" style={{color:'#9A9080'}}>—</div>}
+            <div className="gallery-grid">
+              {galleryItems.map((item, i) => (
+                <div key={i} className={`gphoto ${item.size}`} onClick={() => setLightbox(item.src)}>
+                  <img src={item.src} alt={item.title} loading="lazy"
+                       onError={e => { e.target.style.background='linear-gradient(135deg,#1a1510,#2a2015)' }} />
+                  <span className="gphoto-corner">0{i+1}</span>
+                  <div className="gphoto-caption">
+                    <div className="gphoto-title">{item.title}</div>
+                    <div className="gphoto-sub">{item.subtitle}</div>
+                  </div>
                 </div>
               ))}
             </div>
-            <p style={{ marginTop:'1.5rem', fontSize:'0.78rem', color:'#9A9080', letterSpacing:'0.04em' }}>
-              * Domingo e Segunda-feira: fechado. Agendamentos via Booksy ou WhatsApp.
+            <p style={{marginTop:'1.5rem',fontSize:'0.8rem',color:'#9A9080',letterSpacing:'0.04em',textAlign:'center'}}>
+              ✦ Clique em qualquer foto para ampliar · Av. Papa Pio XII, nº 218 — Guarulhos / SP
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* JEFFERSON SECTION */}
       <div className="jeff-section">
         <div className="jeff-img-side">
-          <img className="jeff-full" src={jeffersonImage} alt="Jefferson — Master Barber"
-               onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#1a1510,#2a2015)'; e.target.parentElement.style.minHeight='500px' }} />
+          <img className="jeff-full" src={jeffersonImage} alt="Jefferson — Master Barber" onError={e=>{e.target.style.display='none';e.target.parentElement.style.background='linear-gradient(135deg,#1a1510,#2a2015)';e.target.parentElement.style.minHeight='500px'}}/>
           <div className="jeff-ov1"/><div className="jeff-ov2"/><div className="jeff-ov3"/><div className="jeff-accent"/>
         </div>
         <div className="jeff-text-wrap">
           <Reveal dir="right">
             <div className="stag">O mestre por trás da arte</div>
             <div className="jeff-quote-big">Barbearia não é só corte de cabelo. É o lugar onde o homem cuida de si mesmo, com orgulho e confiança.</div>
-            <div className="jeff-name-big">Jefferson</div>
-            <div className="jeff-role-big">Fundador & Master Barber — Trend Blade Barbearia</div>
-            <div className="jeff-grid">
-              {[{l:'Especialidade',v:'Cortes Degradê & Barba'},{l:'Localização',v:'Guarulhos, SP'},{l:'Agendamento',v:'Booksy & WhatsApp'},{l:'Atendimento',v:'Terça → Sábado'}].map((s,i) => (
-                <div key={i}><div className="jspec-l">{s.l}</div><div className="jspec-v">{s.v}</div></div>
-              ))}
-            </div>
-            <div style={{ marginTop:'2.5rem', display:'flex', gap:'1rem', flexWrap:'wrap' }}>
-              <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                 target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'0.82rem'}}><Calendar size={14}/> Agendar</a>
-              <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{fontSize:'0.82rem'}}><Phone size={14}/> WhatsApp</a>
-            </div>
+            <div className="jeff-name-big">Jefferson Gomes</div><div className="jeff-role-big">Fundador & Master Barber — Trend Blade Barbearia</div>
+            <div className="jeff-grid">{[{l:'Especialidade',v:'Cortes Degradê & Barba'},{l:'Localização',v:'Guarulhos, SP'},{l:'Agendamento',v:'Online & WhatsApp'},{l:'Atendimento',v:'Terça → Sábado'}].map((s,i)=><div key={i}><div className="jspec-l">{s.l}</div><div className="jspec-v">{s.v}</div></div>)}</div>
+            <div style={{marginTop:'2.5rem',display:'flex',gap:'1rem',flexWrap:'wrap'}}><a href={AGENDAMENTO_URL} target="_blank" rel="noopener noreferrer" className="btn-g" style={{fontSize:'0.82rem'}}><Calendar size={14}/> Agendar</a><a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{fontSize:'0.82rem'}}><Phone size={14}/> WhatsApp</a></div>
           </Reveal>
         </div>
       </div>
 
-      {/* AMENIDADES */}
-      <div className="amenities">
-        {[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão de Crédito'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i) => (
-          <div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>
-        ))}
-      </div>
+      <div className="amenities">{[{icon:Wifi,t:'Wi-Fi Gratuito'},{icon:CreditCard,t:'Cartão & PIX'},{icon:Scissors,t:'Especialistas'},{icon:Star,t:'5.0 Google'},{icon:Heart,t:'Ambiente Familiar'}].map((a,i)=><div key={i} className="amen"><a.icon size={15} color="#C9A84C"/>{a.t}</div>)}</div>
 
-      {/* DEPOIMENTOS */}
-      <section id="depoimentos" className="sec" style={{ background:'#0F0F0F' }}>
+      <section id="depoimentos" className="sec" style={{background:'#0F0F0F'}}>
         <div className="inner">
           <Reveal><div className="stag">Clientes satisfeitos</div><h2 className="stitle">O que nossos <span>clientes</span> dizem</h2><div className="sdiv"/></Reveal>
-          <div className="test-grid">
-            {testimonials.map((t,i) => (
-              <Reveal key={i} delay={i*0.1}>
-                <div className="tcard">
-                  <div className="tcard-quote">"</div>
-                  <div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}>
-                    <div className="tavatar">{t.initial}</div>
-                    <div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div>
-                  </div>
-                  <div className="tstars">{[...Array(t.rating)].map((_,j) => <Star key={j} size={12} fill="#C9A84C" color="#C9A84C"/>)}</div>
-                  <div className="ttext">"{t.text}"</div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+          <div className="test-grid">{testimonials.map((t,i)=><Reveal key={i} delay={i*0.1}><div className="tcard"><div className="tcard-quote">"</div><div style={{display:'flex',alignItems:'center',gap:'0.8rem',marginBottom:'1rem'}}><div className="tavatar">{t.initial}</div><div><div className="tname">{t.name}</div><div className="ttime">{t.time}</div></div></div><div className="tstars">{[...Array(t.rating)].map((_,j)=><Star key={j} size={12} fill="#C9A84C" color="#C9A84C"/>)}</div><div className="ttext">"{t.text}"</div></div></Reveal>)}</div>
         </div>
       </section>
 
-      {/* CONTATO */}
-      <section id="contato" className="sec" style={{ background:'#0A0A0A' }}>
+      <section id="contato" className="sec" style={{background:'#0A0A0A'}}>
         <div className="inner">
           <Reveal><div className="stag">Fale conosco</div><h2 className="stitle">Entre em <span>Contato</span></h2><div className="sdiv"/></Reveal>
           <div className="contact-layout">
             <Reveal>
-              {[
-                {icon:MapPin,label:'Endereço',val:'Av Papa Pio XII, nº 218\nGuarulhos, São Paulo'},
-                {icon:Phone,label:'WhatsApp',val:'(11) 95123-1443',href:'https://wa.me/5511951231443'},
-                {icon:Instagram,label:'Instagram',val:'@trendbladebarbearia',href:'https://instagram.com/trendbladebarbearia'},
-              ].map((c,i) => (
-                <div key={i} className="citem">
-                  <div className="cicon"><c.icon size={18} color="#C9A84C"/></div>
-                  <div>
-                    <div className="clabel">{c.label}</div>
-                    {c.href ? <div className="cval"><a href={c.href} target="_blank" rel="noopener noreferrer">{c.val}</a></div>
-                      : <div className="cval" style={{whiteSpace:'pre-line'}}>{c.val}</div>}
-                  </div>
-                </div>
+              {[{icon:MapPin,label:'Endereço',val:'Av Papa Pio XII, nº 218\nGuarulhos, São Paulo'},{icon:Phone,label:'WhatsApp',val:'(11) 95123-1443',href:'https://wa.me/5511951231443'},{icon:Instagram,label:'Instagram',val:'@trendblade',href:'https://instagram.com/trendblade'}].map((c,i)=>(
+                <div key={i} className="citem"><div className="cicon"><c.icon size={18} color="#C9A84C"/></div><div><div className="clabel">{c.label}</div>{c.href?<div className="cval"><a href={c.href} target="_blank" rel="noopener noreferrer">{c.val}</a></div>:<div className="cval" style={{whiteSpace:'pre-line'}}>{c.val}</div>}</div></div>
               ))}
-              <div className="citem">
-                <div className="cicon"><Clock size={18} color="#C9A84C"/></div>
-                <div style={{flex:1}}>
-                  <div className="clabel">Horários</div>
-                  <table className="sched-tbl">
-                    <tbody>
-                      <tr className="closed-row"><td>Domingo</td><td>Fechado</td></tr>
-                      <tr className="closed-row"><td>Segunda</td><td>Fechado</td></tr>
-                      <tr><td>Terça a Sexta</td><td>09h às 19h</td></tr>
-                      <tr><td>Sábado</td><td>08h às 17h</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <div className="citem"><div className="cicon"><Clock size={18} color="#C9A84C"/></div><div style={{flex:1}}><div className="clabel">Horários</div><table className="sched-tbl"><tbody><tr className="closed-row"><td>Domingo</td><td>Fechado</td></tr><tr className="closed-row"><td>Segunda</td><td>Fechado</td></tr><tr><td>Terça a Sábado</td><td>09h às 19h30</td></tr></tbody></table></div></div>
             </Reveal>
             <Reveal delay={0.15}>
               <div className="cbox">
                 <div style={{fontFamily:'Oswald',fontSize:'1.1rem',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',color:'#C9A84C',marginBottom:'1.5rem'}}>Agende seu Horário</div>
                 <div style={{display:'flex',flexDirection:'column',gap:'0.8rem',marginBottom:'2rem'}}>
-                  <a href="https://booksy.com/pt-br/270879_trend-blade-barbearia_barbearias_931546_guarulhos#ba_s=seo"
-                     target="_blank" rel="noopener noreferrer" className="btn-g" style={{justifyContent:'center'}}><Calendar size={16}/> Agendar pelo Booksy</a>
+                  <a href={AGENDAMENTO_URL} target="_blank" rel="noopener noreferrer" className="btn-g" style={{justifyContent:'center'}}><Calendar size={16}/> Agendar Online</a>
                   <a href="https://wa.me/5511951231443" target="_blank" rel="noopener noreferrer" className="btn-o" style={{justifyContent:'center'}}><Phone size={16}/> WhatsApp</a>
                 </div>
                 <div style={{borderTop:'1px solid rgba(255,255,255,0.06)',paddingTop:'1.5rem'}}>
                   <div style={{fontFamily:'Barlow Condensed',fontSize:'0.65rem',letterSpacing:'0.25em',textTransform:'uppercase',color:'#C9A84C',marginBottom:'1rem'}}>Por que nos escolher</div>
-                  {['Profissionais especializados e dedicados','Ambiente familiar e aconchegante','Técnicas modernas e tradicionais','Atendimento personalizado','Localização privilegiada em Guarulhos'].map((item,i) => (
-                    <div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:'0.6rem',fontSize:'0.875rem',color:'#9A9080'}}>
-                      <span style={{color:'#C9A84C',fontSize:'0.6rem'}}>✦</span>{item}
-                    </div>
-                  ))}
+                  {['Profissionais especializados e dedicados','Ambiente familiar e aconchegante','Técnicas modernas e tradicionais','Atendimento personalizado','Localização privilegiada em Guarulhos'].map((item,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:'0.6rem',fontSize:'0.875rem',color:'#9A9080'}}><span style={{color:'#C9A84C',fontSize:'0.6rem'}}>✦</span>{item}</div>)}
                 </div>
               </div>
             </Reveal>
@@ -679,34 +550,13 @@ export default function App() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer className="footer">
         <div className="footer-main">
-          <div>
-            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:'1rem'}}>
-              <img src={logoImage} alt="Trend Blade" style={{height:36,width:'auto'}}/>
-              <span style={{fontFamily:'Oswald',fontWeight:700,fontSize:'1.2rem',letterSpacing:'0.1em',color:'#C9A84C'}}>TREND <span style={{color:'#F5F0E8'}}>BLADE</span></span>
-            </div>
-            <p className="footer-txt">Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento familiar diferenciado.</p>
-          </div>
-          <div>
-            <div className="footer-col-t">Contato</div>
-            <div className="footer-txt">(11) 95123-1443<br/>@trendbladebarbearia<br/>Av Papa Pio XII, nº 218<br/>Guarulhos, SP</div>
-          </div>
-          <div>
-            <div className="footer-col-t">Horários</div>
-            <div className="footer-txt">
-              <span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>
-              Ter a Sex — 09h às 19h<br/>Sáb — 08h às 17h
-            </div>
-          </div>
+          <div><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:'1rem'}}><img src={logoImage} alt="Trend Blade" style={{height:36,width:'auto'}}/><span style={{fontFamily:'Oswald',fontWeight:700,fontSize:'1.2rem',letterSpacing:'0.1em',color:'#C9A84C'}}>TREND <span style={{color:'#F5F0E8'}}>BLADE</span></span></div><p className="footer-txt">Barbearia premium em Guarulhos com foco em estilo, precisão e atendimento familiar diferenciado.</p></div>
+          <div><div className="footer-col-t">Contato</div><div className="footer-txt">(11) 95123-1443<br/>@trendblade<br/>Av Papa Pio XII, nº 218<br/>Guarulhos, SP</div></div>
+          <div><div className="footer-col-t">Horários</div><div className="footer-txt"><span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>Ter a Sáb — 09h às 19h30</div></div>
         </div>
-        <div style={{maxWidth:1280,margin:'0 auto'}}>
-          <div className="footer-bottom">
-            <span>© 2025 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span>
-            <div className="fbadge">Homologação</div>
-          </div>
-        </div>
+        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><span>© 2026 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><div className="fbadge">v2026</div></div></div>
       </footer>
     </div>
   )
