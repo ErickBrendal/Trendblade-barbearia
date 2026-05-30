@@ -143,10 +143,11 @@ export default function App() {
         if (el && window.scrollY >= el.offsetTop - 130) { setActiveSection(id); break }
       }
     }
-    const onMouse = (e) => setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight })
-    window.addEventListener('scroll', onScroll)
-    window.addEventListener('mousemove', onMouse)
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('mousemove', onMouse) }
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0)
+    const onMouse = (e) => { if (!isTouch) setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    if (!isTouch) window.addEventListener('mousemove', onMouse, { passive: true })
+    return () => { window.removeEventListener('scroll', onScroll); if (!isTouch) window.removeEventListener('mousemove', onMouse) }
   }, [])
 
   const scrollTo = (id) => { setMobileOpen(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
@@ -195,7 +196,10 @@ export default function App() {
       <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:ital,wght@0,300;0,400;0,500;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
       <style>{`
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html,body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;position:relative}
         html{scroll-behavior:smooth}
+        body{touch-action:pan-y;overscroll-behavior-y:auto}
+        img,video{max-width:100%;height:auto}
         :root{--gold:#C9A84C;--gold-l:#E8C96A;--gold-d:#8B6914;--dark:#0A0A0A;--dark2:#0F0F0F;--mid:#181818;--mid2:#202020;--muted:#9A9080;--light:#F5F0E8;--red:#c0392b}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         .oswald{font-family:'Oswald',sans-serif} .bc{font-family:'Barlow Condensed',sans-serif}
@@ -214,8 +218,8 @@ export default function App() {
         .nav-cta:hover{background:var(--gold-l)!important;transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.3)!important} .nav-cta::after{display:none!important}
         .hamburger{display:none;background:none;border:1px solid rgba(201,168,76,0.3);border-radius:2px;cursor:pointer;color:var(--light);padding:6px 8px;transition:all 0.2s}
         .hamburger:hover{border-color:var(--gold);color:var(--gold)}
-        .mmenu{position:fixed;inset:0;background:rgba(10,10,10,0.99);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
-        .mmenu.open{opacity:1;pointer-events:all}
+        .mmenu{position:fixed;inset:0;background:rgba(10,10,10,0.99);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;opacity:0;pointer-events:none;transition:opacity 0.3s;visibility:hidden;overflow-y:auto}
+        .mmenu.open{opacity:1;pointer-events:all;visibility:visible}
         .mmenu-link{font-family:'Oswald',sans-serif;font-size:2.3rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--light);background:none;border:none;cursor:pointer;transition:color 0.2s} .mmenu-link:hover{color:var(--gold)}
         .mmenu-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s} .mmenu-close:hover{color:var(--gold)}
         .btn-g{display:inline-flex;align-items:center;gap:0.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--gold);color:var(--dark);padding:0.95rem 2.2rem;border:none;border-radius:2px;cursor:pointer;text-decoration:none;transition:all 0.25s;position:relative;overflow:hidden}
@@ -347,8 +351,15 @@ export default function App() {
         .fbadge{font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.12);padding:0.25rem 0.8rem}
         .amenities{background:var(--mid);border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);padding:2rem 2.5rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.5rem}
         .amen{display:flex;align-items:center;gap:0.6rem;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color 0.2s} .amen:hover{color:var(--gold)}
-        .glow-cursor{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease}
+        .glow-cursor{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:left 0.15s ease,top 0.15s ease;will-change:left,top}
+        @media(hover:none),(pointer:coarse){.glow-cursor{display:none!important}}
+        /* Mobile-first scroll safety */
         @media(max-width:1024px){
+          html,body{height:auto;min-height:100%;overflow-x:hidden!important;overflow-y:scroll!important}
+          .hero{min-height:auto!important}
+          /* Disable particle field on mobile/tablet for performance and touch safety */
+          .hero canvas{display:none!important}
+
           .hero{grid-template-columns:1fr;min-height:auto}
           .hero-right{justify-content:center;padding:1rem 2.5rem 4rem;order:-1}
           .hero-left{padding:6rem 2.5rem 2rem;text-align:left}
@@ -361,6 +372,8 @@ export default function App() {
           .glow-cursor{display:none}
         }
         @media(max-width:768px){
+          html,body{overflow-x:hidden!important;overflow-y:auto!important;position:static!important;width:100%!important}
+          .hero,.sec,.jeff-section,.amenities,.band,.footer{width:100%;max-width:100vw;overflow-x:hidden}
           .nav-links{display:none} .hamburger{display:block}
           .nav-inner{padding:0 1.25rem;height:64px}
           .nav-logo img{height:32px}
