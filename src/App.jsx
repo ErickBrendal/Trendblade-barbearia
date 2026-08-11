@@ -674,7 +674,7 @@ export default function App() {
           <div><div className="footer-col-t">Contato</div><div className="footer-txt">(11) 95123-1443<br/>@trendblade<br/>Av Papa Pio XII, nº 218<br/>Guarulhos, SP</div></div>
           <div><div className="footer-col-t">Horários</div><div className="footer-txt"><span style={{color:'rgba(192,57,43,0.7)'}}>Dom & Seg — Fechado</span><br/>Ter a Sáb — 09h às 19h30</div></div>
         </div>
-        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><span>© 2026 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><div className="fbadge">v2026</div></div></div>
+        <div style={{maxWidth:1280,margin:'0 auto'}}><div className="footer-bottom"><span>© 2026 Trend Blade Barbearia. Estilo, precisão e sofisticação em Guarulhos.</span><div style={{display:'flex',gap:8,alignItems:'center'}}><a href="/impressao" className="fbadge" style={{textDecoration:'none'}}>Impressão</a><div className="fbadge">v2026</div></div></div></div>
       </footer>
     </div>
   )
