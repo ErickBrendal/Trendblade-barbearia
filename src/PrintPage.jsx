@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bluetooth, Usb, Printer, Smartphone, CheckCircle2, XCircle, ChevronDown, ArrowLeft, Scissors } from 'lucide-react'
+import { Bluetooth, Usb, Printer, Smartphone, Monitor, CheckCircle2, XCircle, ChevronDown, ArrowLeft, Scissors } from 'lucide-react'
 import { buildReceipt, buildTestTicket, formatBRL, translit } from './lib/escpos.js'
 import { BluetoothPrinter, UsbPrinter, printViaRawBT, bluetoothSupported, usbSupported, isAndroid } from './lib/printer.js'
 import logoImage from './assets/IMG_7057.jpg'
@@ -86,6 +86,67 @@ export default function PrintPage() {
   const rawbt = (bytes) => {
     log('Abrindo RawBT... Se nada acontecer, instale o app "RawBT" na Play Store.')
     printViaRawBT(bytes)
+  }
+
+  // Impressao pelo driver do Windows (janela de impressao do sistema).
+  // Funciona com a MPT2 instalada via driver POS-58, tanto na porta USB quanto Bluetooth.
+  const frameRef = useRef(null)
+  const escHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+  const receiptHtml = (test = false) => {
+    const dt = new Date()
+    const body = test
+      ? `<div class="h1">TREND BLADE</div>
+         <div class="c">Teste de impressão MPT2</div><hr/>
+         <p>Se você está lendo isto, a impressora está funcionando pelo driver do Windows!</p>
+         <hr class="dbl"/><div class="c">0123456789 ABCDEFGHIJ abcdefghij</div>`
+      : `<div class="h1">TREND BLADE</div>
+         <div class="c b">BARBEARIA</div>
+         <div class="c">Av. Papa Pio XII, 218<br/>Guarulhos - SP<br/>WhatsApp (11) 95123-1443</div>
+         <hr class="dbl"/>
+         <div class="row"><span>Data:</span><span>${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span></div>
+         ${cliente ? `<div class="row"><span>Cliente:</span><span>${escHtml(cliente)}</span></div>` : ''}
+         ${barbeiro ? `<div class="row"><span>Barbeiro:</span><span>${escHtml(barbeiro)}</span></div>` : ''}
+         <hr/>
+         <div class="b">SERVIÇOS</div>
+         ${itens.map((i) => `<div class="row"><span>${escHtml(i.name)}</span><span>${formatBRL(i.price)}</span></div>`).join('')}
+         <hr/>
+         <div class="row total"><span>TOTAL</span><span>${formatBRL(total)}</span></div>
+         <div class="row"><span>Pagamento:</span><span>${escHtml(pagamento)}</span></div>
+         ${obs ? `<hr/><div>Obs: ${escHtml(obs)}</div>` : ''}
+         <hr class="dbl"/>
+         <div class="c">Obrigado pela preferência!<br/>Volte sempre · @trendblade<br/>* NÃO É DOCUMENTO FISCAL *</div>`
+    return `<!doctype html><html><head><meta charset="utf-8"><title>Recibo</title><style>
+      @page{size:58mm auto;margin:0}
+      html,body{margin:0;padding:0}
+      body{width:58mm;padding:2mm 3mm;font-family:'Courier New',monospace;font-size:9pt;line-height:1.35;color:#000;background:#fff;-webkit-print-color-adjust:exact}
+      p{margin:2px 0}
+      .c{text-align:center}
+      .b{font-weight:700}
+      .h1{font-size:14pt;font-weight:700;text-align:center;letter-spacing:1px}
+      .row{display:flex;justify-content:space-between;gap:4px}
+      .row span:last-child{white-space:nowrap}
+      .total{font-size:12pt;font-weight:700;margin:2px 0}
+      hr{border:none;border-top:1px dashed #000;margin:4px 0}
+      hr.dbl{border-top:2px solid #000}
+    </style></head><body>${body}</body></html>`
+  }
+
+  const printViaWindows = (test = false) => {
+    if (!test && !itens.length) { log('Selecione pelo menos um servico.', 'err'); return }
+    let f = frameRef.current
+    if (!f) {
+      f = document.createElement('iframe')
+      f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'
+      document.body.appendChild(f)
+      frameRef.current = f
+    }
+    f.onload = () => {
+      try { f.contentWindow.focus(); f.contentWindow.print() }
+      catch { log('Nao foi possivel abrir a janela de impressao.', 'err') }
+    }
+    f.srcdoc = receiptHtml(test)
+    log('Abrindo a janela de impressao do sistema... selecione a MPT2 (driver POS-58) e confirme.', 'ok')
   }
 
   // preview textual do cupom
@@ -197,13 +258,19 @@ export default function PrintPage() {
                   <XCircle size={15} /> Nenhuma impressora conectada
                 </div>
               )}
+              <label className="pp-label">Pelo Windows (impressora instalada) — recomendado no PC</label>
+              <div className="pp-grid" style={{ marginBottom: '0.9rem' }}>
+                <button className="pp-btn pp-btn-g" onClick={() => printViaWindows(false)} disabled={busy}><Monitor size={15} /> Imprimir Recibo</button>
+                <button className="pp-btn pp-btn-o" onClick={() => printViaWindows(true)} disabled={busy}><Monitor size={15} /> Imprimir Teste</button>
+              </div>
+              <label className="pp-label">Conexao direta (sem driver)</label>
               <div className="pp-grid" style={{ marginBottom: '0.6rem' }}>
                 <button className="pp-btn pp-btn-o" onClick={connectBt} disabled={busy || !bluetoothSupported()}><Bluetooth size={15} /> Conectar Bluetooth</button>
                 <button className="pp-btn pp-btn-o" onClick={connectUsb} disabled={busy || !usbSupported()}><Usb size={15} /> Conectar USB</button>
               </div>
               <div className="pp-grid" style={{ marginBottom: '0.6rem' }}>
-                <button className="pp-btn pp-btn-g" onClick={printReceipt} disabled={busy || !conn}><Printer size={15} /> Imprimir Recibo</button>
-                <button className="pp-btn pp-btn-o" onClick={() => doPrint(buildTestTicket())} disabled={busy || !conn}>Imprimir Teste</button>
+                <button className="pp-btn pp-btn-o" onClick={printReceipt} disabled={busy || !conn}><Printer size={15} /> Recibo (direto)</button>
+                <button className="pp-btn pp-btn-o" onClick={() => doPrint(buildTestTicket())} disabled={busy || !conn}>Teste (direto)</button>
               </div>
               {isAndroid() && (
                 <div className="pp-grid">
@@ -242,7 +309,7 @@ export default function PrintPage() {
                   <p style={{ marginBottom: '0.6rem' }}><b style={{ color: '#F5F0E8' }}>1. Teste fisico:</b> desligue a MPT2, segure o botao de papel (feed) e ligue — ela deve imprimir um autoteste. Se nao imprimir, verifique a bobina (papel termico, lado correto para cima) e a bateria/fonte.</p>
                   <p style={{ marginBottom: '0.6rem' }}><b style={{ color: '#F5F0E8' }}>2. Bluetooth + USB ao mesmo tempo:</b> mantenha apenas UMA conexao. Se ela estiver pareada no celular/PC e conectada no cabo, uma conexao trava a outra. Desconecte uma delas.</p>
                   <p style={{ marginBottom: '0.6rem' }}><b style={{ color: '#F5F0E8' }}>3. Bluetooth aqui nao encontra a MPT2:</b> muitas MPT2 sao Bluetooth "classico", que o navegador nao acessa. No Android, use o app gratuito <b style={{ color: '#F5F0E8' }}>RawBT</b> (Play Store): instale, selecione a MPT2 nas configuracoes dele e use os botoes "via RawBT" acima.</p>
-                  <p style={{ marginBottom: '0.6rem' }}><b style={{ color: '#F5F0E8' }}>4. USB no Windows:</b> se o Windows ja instalou driver de impressora nessa porta, o navegador nao consegue acesso direto. Imprima pelo driver POS-58 (papel 58mm) ou use Bluetooth/RawBT.</p>
+                  <p style={{ marginBottom: '0.6rem' }}><b style={{ color: '#F5F0E8' }}>4. No Windows:</b> use os botoes "Pelo Windows" acima — eles imprimem pelo driver instalado (POS-58). Na janela que abrir, selecione a MPT2. Se sair em branco ou nao sair nada: em Configuracoes &gt; Bluetooth e dispositivos &gt; Impressoras, abra a MPT2 &gt; Propriedades da impressora &gt; aba Portas e confira se a porta marcada e a correta (USB001 para cabo, ou a COM do Bluetooth). Papel: 58mm. Depois faca "Imprimir pagina de teste" no proprio Windows.</p>
                   <p><b style={{ color: '#F5F0E8' }}>5. Pareamento:</b> PIN padrao da MPT2 costuma ser <b style={{ color: '#F5F0E8' }}>0000</b> ou <b style={{ color: '#F5F0E8' }}>1234</b>.</p>
                 </div>
               )}
